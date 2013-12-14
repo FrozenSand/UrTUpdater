@@ -18,3 +18,6 @@ SOURCES += main.cpp\
 HEADERS  += urtupdater.h
 
 FORMS    += urtupdater.ui
+
+RESOURCES += \
+    images.qrc

@@ -19,11 +19,31 @@ public:
     void quit();
     QString getPlatform();
     QString getCurrentPath();
+    void getManifest();
+    void parseDOM(QString data);
+    QString getMd5Sum(QFile* file);
+
+public slots:
+    void parseAPIAnswer();
+    void errorAPI(QNetworkReply::NetworkError);
 
 private:
     Ui::UrTUpdater *ui;
 
     QString updaterPath;
+    QString versionNumber;
+    QString releaseDate;
+
+    QList<fileInfo_s> filesToDownload;
+
+    QNetworkReply *apiAnswer;
 };
+
+typedef struct {
+    QString fileName;
+    QString fileMd5;
+    QString filePath;
+    QString fileSize;
+} fileInfo_s;
 
 #endif // URTUPDATER_H

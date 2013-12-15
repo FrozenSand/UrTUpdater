@@ -4,6 +4,13 @@
 #include <QMainWindow>
 #include "common.h"
 
+typedef struct {
+    QString fileName;
+    QString fileMd5;
+    QString filePath;
+    QString fileSize;
+} fileInfo_s;
+
 namespace Ui {
     class UrTUpdater;
 }
@@ -38,12 +45,5 @@ private:
 
     QNetworkReply *apiAnswer;
 };
-
-typedef struct {
-    QString fileName;
-    QString fileMd5;
-    QString filePath;
-    QString fileSize;
-} fileInfo_s;
 
 #endif // URTUPDATER_H

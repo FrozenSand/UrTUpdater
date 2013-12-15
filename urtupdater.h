@@ -22,6 +22,8 @@ public:
 
 private:
     Ui::UrTUpdater *ui;
+
+    QString updaterPath;
 };
 
 #endif // URTUPDATER_H

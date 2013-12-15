@@ -15,7 +15,8 @@ TEMPLATE = app
 SOURCES += main.cpp\
         urtupdater.cpp
 
-HEADERS  += urtupdater.h
+HEADERS  += urtupdater.h \
+    common.h
 
 FORMS    += urtupdater.ui
 

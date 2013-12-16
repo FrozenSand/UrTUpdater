@@ -35,7 +35,7 @@ public:
 
 public slots:
     void parseAPIAnswer();
-    void errorAPI(QNetworkReply::NetworkError);
+    void networkError(QNetworkReply::NetworkError);
     void quit();
 
 private:

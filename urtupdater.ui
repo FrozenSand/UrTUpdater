@@ -30,11 +30,13 @@
     <normaloff>:/images/urtupdater.png</normaloff>:/images/urtupdater.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/images/background_urtupdater.png); background-color:black; 
-background-repeat: no-repeat; 
-background-position: 20px 20px;</string>
+   <string notr="true"/>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QWidget" name="centralWidget">
+   <property name="styleSheet">
+    <string notr="true">background-image: url(:/images/background_urtupdater.png); background-color:black; background-repeat: no-repeat; background-position: 20px 20px;</string>
+   </property>
+  </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>

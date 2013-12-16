@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include "common.h"
+#include "serverselection.h"
+#include "engineselection.h"
 
 typedef struct {
     QString fileName;
@@ -23,16 +25,18 @@ public:
     explicit UrTUpdater(QWidget *parent = 0);
     ~UrTUpdater();
     void init();
-    void quit();
     QString getPlatform();
     QString getCurrentPath();
     void getManifest();
     void parseDOM(QString data);
     QString getMd5Sum(QFile* file);
+    void serverSelection();
+    void engineSelection();
 
 public slots:
     void parseAPIAnswer();
     void errorAPI(QNetworkReply::NetworkError);
+    void quit();
 
 private:
     Ui::UrTUpdater *ui;

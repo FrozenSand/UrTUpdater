@@ -3,8 +3,10 @@
 
 UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpdater)
 {
-    ui->setupUi(this);
-    init();
+    //ui->setupUi(this);
+    //init();
+    //serverSelection();
+    engineSelection();
 }
 
 UrTUpdater::~UrTUpdater()
@@ -223,6 +225,16 @@ QString UrTUpdater::getMd5Sum(QFile* file)
 void UrTUpdater::errorAPI(QNetworkReply::NetworkError){
     QMessageBox::critical(this, "API error", "Could not get the information from the API, please report it on www.urbanterror.info and try again later.");
     quit();
+}
+
+void UrTUpdater::serverSelection(){
+    ServerSelection* serverSel = new ServerSelection(this);
+    serverSel->show();
+}
+
+void UrTUpdater::engineSelection(){
+    EngineSelection* engineSel = new EngineSelection(this);
+    engineSel->show();
 }
 
 void UrTUpdater::quit(){

@@ -10,6 +10,10 @@
 #include <QUrlQuery>
 #include <QDomDocument>
 #include <QCryptographicHash>
+#include <QGridLayout>
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QLabel>
 
 #define URT_GAME_NAME       "Urban Terror"
 #define URT_GAME_SUBDIR     "q3ut4"

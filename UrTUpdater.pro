@@ -6,6 +6,8 @@
 
 QT       += core gui network widgets xml
 
+CONFIG   += x86
+
 TARGET = UrTUpdater
 TEMPLATE = app
 

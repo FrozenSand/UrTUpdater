@@ -6,13 +6,6 @@
 #include "serverselection.h"
 #include "engineselection.h"
 
-typedef struct {
-    QString fileName;
-    QString fileMd5;
-    QString filePath;
-    QString fileSize;
-} fileInfo_s;
-
 namespace Ui {
     class UrTUpdater;
 }
@@ -24,19 +17,20 @@ class UrTUpdater : public QMainWindow
 public:
     explicit UrTUpdater(QWidget *parent = 0);
     ~UrTUpdater();
-    void init();
-    QString getPlatform();
-    QString getCurrentPath();
-    void getManifest();
-    void parseDOM(QString data);
-    QString getMd5Sum(QFile* file);
-    void serverSelection();
-    void engineSelection();
+    QNetworkReply *apiAnswer;
 
 public slots:
     void parseAPIAnswer();
     void networkError(QNetworkReply::NetworkError);
     void quit();
+    void init();
+    QString getPlatform();
+    QString getCurrentPath();
+    void getManifest(QString query);
+    void parseDOM(QString data);
+    QString getMd5Sum(QFile* file);
+    void serverSelection();
+    void engineSelection();
 
 private:
     Ui::UrTUpdater *ui;
@@ -46,8 +40,7 @@ private:
     QString releaseDate;
 
     QList<fileInfo_s> filesToDownload;
-
-    QNetworkReply *apiAnswer;
+    QList<serverInfo_s>    downloadServers;
 };
 
 #endif // URTUPDATER_H

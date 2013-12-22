@@ -5,8 +5,6 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 {
     ui->setupUi(this);
     init();
-    //serverSelection();
-    //engineSelection();
 }
 
 UrTUpdater::~UrTUpdater()
@@ -44,7 +42,7 @@ void UrTUpdater::init(){
         }
     }
 
-    getManifest();
+    getManifest("versionInfo");
 }
 
 QString UrTUpdater::getPlatform()
@@ -79,15 +77,17 @@ QString UrTUpdater::getCurrentPath(){
     return dir.absolutePath() + "/";
 }
 
-void UrTUpdater::getManifest(){
+void UrTUpdater::getManifest(QString query){
     QUrl APIUrl(URT_API_LINK);
     QUrlQuery url;
     QNetworkRequest apiRequest(APIUrl);
     QNetworkAccessManager *apiManager = new QNetworkAccessManager(this);
 
+    qDebug() << "query: " << query << endl;
+
     apiRequest.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded;charset=utf-8");
     url.addQueryItem("platform", getPlatform());
-    url.addQueryItem("query", "versionInfo");
+    url.addQueryItem("query", query);
 
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));
@@ -104,19 +104,19 @@ void UrTUpdater::parseAPIAnswer(){
 }
 
 void UrTUpdater::parseDOM(QString data){
-    QDomDocument* dom = new QDomDocument("versionInfo");
+    QDomDocument* dom = new QDomDocument();
     dom->setContent(data);
 
     QDomNode node = dom->firstChild();
 
     while(!node.isNull()){
+        if(node.toElement().nodeName() == "Updater"){
+            QDomNode updater = node.firstChild();
 
-        if(node.toElement().nodeName() == "CurrentVersion"){
-            QDomNode currentVersion = node.firstChild();
+            while(!updater.isNull()){
 
-            while(!currentVersion.isNull()){
-                if(currentVersion.toElement().nodeName() == "VersionInfo"){
-                    QDomNode versionInfo = currentVersion.firstChild();
+                if(updater.toElement().nodeName() == "VersionInfo"){
+                    QDomNode versionInfo = updater.firstChild();
 
                     while(!versionInfo.isNull()){
                         if(versionInfo.nodeName() == "VersionNumber"){
@@ -129,8 +129,41 @@ void UrTUpdater::parseDOM(QString data){
                     }
                 }
 
-                if(currentVersion.toElement().nodeName() == "Files"){
-                    QDomNode files = currentVersion.firstChild();
+                else if(updater.toElement().nodeName() == "ServerList"){
+                    QDomNode serverListNode = updater.firstChild();
+
+                    while(!serverListNode.isNull()){
+                        if(serverListNode.nodeName() == "Server"){
+                            QDomNode serverNode = serverListNode.firstChild();
+                            QString serverURL;
+                            QString serverName;
+                            QString serverLocation;
+                            serverInfo_s si;
+
+                            while(!serverNode.isNull()){
+                                if(serverNode.nodeName() == "ServerName"){
+                                    serverName = serverNode.toElement().text();
+                                }
+                                if(serverNode.nodeName() == "ServerURL"){
+                                    serverURL = serverNode.toElement().text();
+                                }
+                                if(serverNode.nodeName() == "ServerLocation"){
+                                    serverLocation = serverNode.toElement().text();
+                                }
+                                serverNode = serverNode.nextSibling();
+                            }
+
+                            si.serverName = serverName;
+                            si.serverURL = serverURL;
+                            si.serverLocation = serverLocation;
+                            downloadServers.append(si);
+                        }
+                        serverListNode = serverListNode.nextSibling();
+                    }
+                }
+
+                else if(updater.toElement().nodeName() == "Files"){
+                    QDomNode files = updater.firstChild();
 
                     while(!files.isNull()){
                         if(files.nodeName() == "File"){
@@ -197,13 +230,13 @@ void UrTUpdater::parseDOM(QString data){
                         files = files.nextSibling();
                     }
                 }
-
-                currentVersion = currentVersion.nextSibling();
+                updater = updater.nextSibling();
             }
         }
-
         node = node.nextSibling();
     }
+
+    serverSelection();
 
     delete dom;
 }
@@ -278,13 +311,16 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
 }
 
 void UrTUpdater::serverSelection(){
-    ServerSelection* serverSel = new ServerSelection(this);
-    serverSel->show();
+    ServerSelection *serverSel = new ServerSelection(this);
+
+    serverSel->downloadServers = downloadServers;
+    serverSel->init();
+    serverSel->exec();
 }
 
 void UrTUpdater::engineSelection(){
     EngineSelection* engineSel = new EngineSelection(this);
-    engineSel->show();
+    engineSel->exec();
 }
 
 void UrTUpdater::quit(){

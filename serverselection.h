@@ -13,6 +13,11 @@ public:
     void init();
     QList<serverInfo_s> downloadServers;
 
+private:
+    QPushButton* okButton;
+    QPushButton* cancelButton;
+    QLabel* selectLabel;
+    QComboBox* serverList;
 };
 
 #endif // SERVERSELECTION_H

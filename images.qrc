@@ -8,4 +8,10 @@
         <file>images/urtupdater.ico</file>
         <file>images/urtupdater.png</file>
     </qresource>
+    <qresource prefix="/flags">
+        <file>be.png</file>
+        <file>es.png</file>
+        <file>fr.png</file>
+        <file>gb.png</file>
+    </qresource>
 </RCC>

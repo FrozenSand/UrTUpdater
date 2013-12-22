@@ -23,8 +23,6 @@ void ServerSelection::init(){
     selectLabel->move(45, 30);
     selectLabel->show();
 
-    qDebug() << "nb servers: " << downloadServers.count();
-
     for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
         serverList->addItem(QIcon(QString(":/flags/%1.png").arg(li->serverLocation)), li->serverName);
     }
@@ -32,7 +30,7 @@ void ServerSelection::init(){
     serverList->move(44, 70);
     serverList->show();
 
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(getServerManifest()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
 
     setWindowTitle("Mirror server selection");
     setFixedSize(450, 200);

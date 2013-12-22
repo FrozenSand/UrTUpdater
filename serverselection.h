@@ -13,9 +13,6 @@ public:
     void init();
     QList<serverInfo_s> downloadServers;
 
-signals:
-    void getServerManifest();
-
 };
 
 #endif // SERVERSELECTION_H

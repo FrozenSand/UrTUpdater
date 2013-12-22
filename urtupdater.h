@@ -39,6 +39,8 @@ private:
     QString versionNumber;
     QString releaseDate;
 
+    QString updaterVersion;
+
     QList<fileInfo_s> filesToDownload;
     QList<serverInfo_s>    downloadServers;
 };

@@ -16,6 +16,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QInputDialog>
+#include <QMenuBar>
 
 #define URT_GAME_NAME       "Urban Terror"
 #define URT_GAME_SUBDIR     "q3ut4"

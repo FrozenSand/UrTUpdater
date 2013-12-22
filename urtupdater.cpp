@@ -4,6 +4,29 @@
 UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpdater)
 {
     ui->setupUi(this);
+
+    updaterVersion = "4.0.1";
+
+    QMenu *menuFile = menuBar()->addMenu("&File");
+    QMenu *menuHelp = menuBar()->addMenu("&Help");
+
+    QAction *actionDlServer = menuFile->addAction("&Download Server Selection");
+    connect(actionDlServer, SIGNAL(triggered()), this, SLOT(serverSelection()));
+
+    QAction *actionChangelog = menuFile->addAction("&Changelog");
+    //connect(actionChangelog, SIGNAL(triggered()), this, SLOT(openChangelogPage()));
+
+    QAction *actionAbout = menuHelp->addAction("&About");
+    //connect(actionAbout, SIGNAL(triggered()), this, SLOT(openAboutPage()));
+
+    QAction *actionHelp = menuHelp->addAction("&Get help");
+    //connect(actionHelp, SIGNAL(triggered()), this, SLOT(openHelpPage()));
+    actionHelp->setShortcut(QKeySequence("Ctrl+H"));
+
+    QAction *actionQuitter = menuFile->addAction("&Quit");
+    connect(actionQuitter, SIGNAL(triggered()), this, SLOT(quit()));
+    actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
+
     init();
 }
 
@@ -235,8 +258,6 @@ void UrTUpdater::parseDOM(QString data){
         }
         node = node.nextSibling();
     }
-
-    serverSelection();
 
     delete dom;
 }

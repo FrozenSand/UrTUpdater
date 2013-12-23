@@ -36,6 +36,7 @@ public slots:
     void checkDownloadServer();
     void checkGameEngine();
     void setDownloadServer(int);
+    void setEngine(int);
 
 private:
     Ui::UrTUpdater *ui;

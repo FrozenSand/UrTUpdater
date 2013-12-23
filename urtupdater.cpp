@@ -500,6 +500,9 @@ void UrTUpdater::serverSelection(){
 void UrTUpdater::engineSelection(){
     EngineSelection* engineSel = new EngineSelection(this);
 
+    connect(engineSel, SIGNAL(engineSelected(int)), this, SLOT(setEngine(int)));
+
+    engineSel->currentEngine = gameEngine;
     engineSel->enginesList = enginesList;
     engineSel->init();
     engineSel->exec();
@@ -507,6 +510,11 @@ void UrTUpdater::engineSelection(){
 
 void UrTUpdater::setDownloadServer(int server){
     downloadServer = server;
+    saveLocalConfig();
+}
+
+void UrTUpdater::setEngine(int engine){
+    gameEngine = engine;
     saveLocalConfig();
 }
 

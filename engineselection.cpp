@@ -28,15 +28,54 @@ void EngineSelection::init(){
         el->addItem(li->engineName);
     }
 
+    el->setCurrentIndex((int)el->findText(getEngineNameById(currentEngine)));
+
     el->move(44, 70);
     el->show();
 
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
 
     setWindowTitle("Engine selection");
     setFixedSize(450, 200);
     setModal(true);
 }
+
+void EngineSelection::okButtonClicked(){
+    int id = getEngineIdByName(el->itemText(el->currentIndex()));
+
+    if(id == -1){
+        return;
+    }
+
+    emit engineSelected(id);
+    close();
+}
+
+int EngineSelection::getEngineIdByName(QString name){
+    QList<engineInfo_s>::iterator li;
+
+    for(li = enginesList.begin(); li != enginesList.end(); ++li){
+        if(li->engineName == name){
+            return li->engineId;
+        }
+    }
+
+    return -1;
+}
+
+QString EngineSelection::getEngineNameById(int id){
+    QList<engineInfo_s>::iterator li;
+
+    for(li = enginesList.begin(); li != enginesList.end(); ++li){
+        if(li->engineId == id){
+            return li->engineName;
+        }
+    }
+
+    return "";
+}
+
 
 EngineSelection::~EngineSelection(){
 

@@ -27,6 +27,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     connect(actionQuitter, SIGNAL(triggered()), this, SLOT(quit()));
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
 
+    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
+
     init();
 }
 

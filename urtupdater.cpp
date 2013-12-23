@@ -6,6 +6,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     ui->setupUi(this);
 
     updaterVersion = "4.0.1";
+    downloadServer = 0;
+    configFileExists = false;
 
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
@@ -107,25 +109,32 @@ void UrTUpdater::parseLocalConfig(){
     QDomDocument *dom = new QDomDocument();
     QFile *f = new QFile(updaterPath + URT_UPDATER_CFG);
 
-    if(f->open(QFile::ReadOnly)){
-        dom->setContent(f);
-
-        QDomNode node = dom->firstChild();
-        while(!node.isNull()){
-            if(node.toElement().nodeName() == "UpdaterConfig"){
-                QDomNode conf = node.firstChild();
-
-                while(!conf.isNull()){
-                    if(conf.toElement().nodeName() == "DownloadServer"){
-                        downloadServer = conf.toElement().text().toInt();
-                    }
-                    conf = conf.nextSibling();
-                }
-            }
-            node = node.nextSibling();
-        }
-        f->close();
+    if(!f->open(QFile::ReadOnly)){
+        delete f;
+        configFileExists = false;
+        return;
     }
+
+    dom->setContent(f);
+
+    QDomNode node = dom->firstChild();
+    while(!node.isNull()){
+        if(node.toElement().nodeName() == "UpdaterConfig"){
+            QDomNode conf = node.firstChild();
+
+            while(!conf.isNull()){
+                if(conf.toElement().nodeName() == "DownloadServer"){
+                    downloadServer = conf.toElement().text().toInt();
+                }
+                conf = conf.nextSibling();
+            }
+        }
+        node = node.nextSibling();
+    }
+
+    configFileExists = true;
+
+    f->close();
 
     delete f;
     delete dom;
@@ -322,7 +331,26 @@ void UrTUpdater::parseManifest(QString data){
         node = node.nextSibling();
     }
 
+    checkDownloadServer();
+
     delete dom;
+}
+
+void UrTUpdater::checkDownloadServer(){
+    QList<serverInfo_s>::iterator li;
+    bool found = false;
+
+    // Check if the download server that is stored in the config file still exists
+    for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
+        if(li->serverId == downloadServer){
+            found = true;
+        }
+    }
+
+    // If the server isn't a mirror anymore, pick the first one in the list
+    if(!found){
+        downloadServer = downloadServers.takeFirst().serverId;
+    }
 }
 
 QString UrTUpdater::getMd5Sum(QFile* file)

@@ -394,7 +394,7 @@ void UrTUpdater::checkDownloadServer(){
         }
     }
 
-    // If the server isn't a mirror anymore, pick the first one in the list
+    // If the engine isn't available anymore, pick the first one in the list
     if(!found){
         downloadServer = downloadServers.takeFirst().serverId;
     }
@@ -489,6 +489,9 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
 void UrTUpdater::serverSelection(){
     ServerSelection *serverSel = new ServerSelection(this);
 
+    connect(serverSel, SIGNAL(serverSelected(int)), this, SLOT(setDownloadServer(int)));
+
+    serverSel->currentServer = downloadServer;
     serverSel->downloadServers = downloadServers;
     serverSel->init();
     serverSel->exec();
@@ -500,6 +503,11 @@ void UrTUpdater::engineSelection(){
     engineSel->enginesList = enginesList;
     engineSel->init();
     engineSel->exec();
+}
+
+void UrTUpdater::setDownloadServer(int server){
+    downloadServer = server;
+    saveLocalConfig();
 }
 
 void UrTUpdater::quit(){

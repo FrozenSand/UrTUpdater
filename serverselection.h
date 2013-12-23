@@ -11,7 +11,17 @@ public:
     explicit ServerSelection(QWidget *parent = 0);
     ~ServerSelection();
     void init();
+    int getServerIdByName(QString);
+    QString getServerNameById(int);
+
     QList<serverInfo_s> downloadServers;
+    int currentServer;
+
+public slots:
+    void okButtonClicked();
+
+signals:
+    void serverSelected(int);
 
 private:
     QPushButton* okButton;

@@ -35,6 +35,7 @@ public slots:
     void saveLocalConfig();
     void checkDownloadServer();
     void checkGameEngine();
+    void setDownloadServer(int);
 
 private:
     Ui::UrTUpdater *ui;

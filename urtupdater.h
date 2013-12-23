@@ -47,8 +47,9 @@ private:
     int downloadServer;
     bool configFileExists;
 
-    QList<fileInfo_s> filesToDownload;
-    QList<serverInfo_s>    downloadServers;
+    QList<fileInfo_s>       filesToDownload;
+    QList<serverInfo_s>     downloadServers;
+    QList<engineInfo_s>     enginesList;
 };
 
 #endif // URTUPDATER_H

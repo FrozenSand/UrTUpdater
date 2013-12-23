@@ -257,6 +257,39 @@ void UrTUpdater::parseManifest(QString data){
                     }
                 }
 
+                else if(updater.toElement().nodeName() == "EngineList"){
+                    QDomNode engineListNode = updater.firstChild();
+
+                    while(!engineListNode.isNull()){
+                        if(engineListNode.nodeName() == "Engine"){
+                            QDomNode engineNode = engineListNode.firstChild();
+                            int     engineId;
+                            QString engineDir;
+                            QString engineName;
+                            engineInfo_s ei;
+
+                            while(!engineNode.isNull()){
+                                if(engineNode.nodeName() == "EngineName"){
+                                    engineName = engineNode.toElement().text();
+                                }
+                                if(engineNode.nodeName() == "EngineDir"){
+                                    engineDir = engineNode.toElement().text();
+                                }
+                                if(engineNode.nodeName() == "EngineId"){
+                                    engineId = engineNode.toElement().text().toInt();
+                                }
+                                engineNode = engineNode.nextSibling();
+                            }
+
+                            ei.engineId = engineId;
+                            ei.engineName = engineName;
+                            ei.engineDir = engineDir;
+                            enginesList.append(ei);
+                        }
+                        engineListNode = engineListNode.nextSibling();
+                    }
+                }
+
                 else if(updater.toElement().nodeName() == "Files"){
                     QDomNode files = updater.firstChild();
 

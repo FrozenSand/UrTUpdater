@@ -38,4 +38,10 @@ typedef struct {
     QString serverLocation;
 } serverInfo_s;
 
+typedef struct {
+    int     engineId;
+    QString engineName;
+    QString engineDir;
+} engineInfo_s;
+
 #endif // COMMON_H

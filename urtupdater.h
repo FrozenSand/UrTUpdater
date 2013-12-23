@@ -34,6 +34,7 @@ public slots:
     void parseLocalConfig();
     void saveLocalConfig();
     void checkDownloadServer();
+    void checkGameEngine();
 
 private:
     Ui::UrTUpdater *ui;
@@ -45,6 +46,7 @@ private:
     QString updaterVersion;
 
     int downloadServer;
+    int gameEngine;
     bool configFileExists;
 
     QList<fileInfo_s>       filesToDownload;

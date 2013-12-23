@@ -7,6 +7,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 
     updaterVersion = "4.0.1";
     downloadServer = 0;
+    gameEngine = 0;
     configFileExists = false;
 
     QMenu *menuFile = menuBar()->addMenu("&File");
@@ -129,6 +130,9 @@ void UrTUpdater::parseLocalConfig(){
                 if(conf.toElement().nodeName() == "DownloadServer"){
                     downloadServer = conf.toElement().text().toInt();
                 }
+                if(conf.toElement().nodeName() == "GameEngine"){
+                    gameEngine = conf.toElement().text().toInt();
+                }
                 conf = conf.nextSibling();
             }
         }
@@ -156,9 +160,15 @@ void UrTUpdater::saveLocalConfig(){
     xml->setDevice(f);
     xml->writeStartDocument();
     xml->writeStartElement("UpdaterConfig");
+
     xml->writeStartElement("DownloadServer");
     xml->writeCharacters(QString::number(downloadServer));
     xml->writeEndElement();
+
+    xml->writeStartElement("GameEngine");
+    xml->writeCharacters(QString::number(gameEngine));
+    xml->writeEndElement();
+
     xml->writeEndElement();
     xml->writeEndDocument();
 
@@ -368,6 +378,7 @@ void UrTUpdater::parseManifest(QString data){
     }
 
     checkDownloadServer();
+    checkGameEngine();
 
     delete dom;
 }
@@ -386,6 +397,23 @@ void UrTUpdater::checkDownloadServer(){
     // If the server isn't a mirror anymore, pick the first one in the list
     if(!found){
         downloadServer = downloadServers.takeFirst().serverId;
+    }
+}
+
+void UrTUpdater::checkGameEngine(){
+    QList<engineInfo_s>::iterator li;
+    bool found = false;
+
+    // Check if the engine that is stored in the config file still exists
+    for(li = enginesList.begin(); li != enginesList.end(); ++li){
+        if(li->engineId == gameEngine){
+            found = true;
+        }
+    }
+
+    // If the server isn't a mirror anymore, pick the first one in the list
+    if(!found){
+        gameEngine = enginesList.takeFirst().engineId;
     }
 }
 

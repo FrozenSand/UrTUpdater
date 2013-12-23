@@ -1,26 +1,41 @@
 #include "engineselection.h"
 
 EngineSelection::EngineSelection(QWidget* parent) : QDialog(parent){
-    QPushButton* okButton = new QPushButton(this);
-    QPushButton* cancelButton = new QPushButton(this);
-    QLabel* selectLabel = new QLabel(this);
 
+}
+
+void EngineSelection::init(){
+    QList<engineInfo_s>::iterator li;
+
+    okButton = new QPushButton(this);
     okButton->setText("Ok");
     okButton->move(377, 160);
     okButton->show();
 
+    cancelButton = new QPushButton(this);
     cancelButton->setText("Go back");
     cancelButton->move(280, 160);
     cancelButton->show();
 
-    selectLabel->setText("Select the game engine that you wish to use to run Urban Terror:");
-    selectLabel->move(20, 30);
+    selectLabel = new QLabel(this);
+    selectLabel->setText("Select the game engine that you want to use:");
+    selectLabel->move(45, 30);
     selectLabel->show();
+
+    el = new QComboBox(this);
+
+    for(li = enginesList.begin(); li != enginesList.end(); ++li){
+        el->addItem(li->engineName);
+    }
+
+    el->move(44, 70);
+    el->show();
 
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
 
-    setWindowTitle("Game Engine selection");
+    setWindowTitle("Engine selection");
     setFixedSize(450, 200);
+    setModal(true);
 }
 
 EngineSelection::~EngineSelection(){

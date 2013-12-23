@@ -12,6 +12,9 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
 
+    QAction *actionEngine = menuFile->addAction("&Engine Selection");
+    connect(actionEngine, SIGNAL(triggered()), this, SLOT(engineSelection()));
+
     QAction *actionDlServer = menuFile->addAction("&Download Server Selection");
     connect(actionDlServer, SIGNAL(triggered()), this, SLOT(serverSelection()));
 
@@ -465,6 +468,9 @@ void UrTUpdater::serverSelection(){
 
 void UrTUpdater::engineSelection(){
     EngineSelection* engineSel = new EngineSelection(this);
+
+    engineSel->enginesList = enginesList;
+    engineSel->init();
     engineSel->exec();
 }
 

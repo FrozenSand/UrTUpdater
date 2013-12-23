@@ -67,6 +67,7 @@ void UrTUpdater::init(){
         }
     }
 
+    parseLocalConfig();
     getManifest("versionInfo");
 }
 
@@ -102,6 +103,61 @@ QString UrTUpdater::getCurrentPath(){
     return dir.absolutePath() + "/";
 }
 
+void UrTUpdater::parseLocalConfig(){
+    QDomDocument *dom = new QDomDocument();
+    QFile *f = new QFile(updaterPath + URT_UPDATER_CFG);
+
+    if(f->open(QFile::ReadOnly)){
+        dom->setContent(f);
+
+        QDomNode node = dom->firstChild();
+        while(!node.isNull()){
+            if(node.toElement().nodeName() == "UpdaterConfig"){
+                QDomNode conf = node.firstChild();
+
+                while(!conf.isNull()){
+                    if(conf.toElement().nodeName() == "DownloadServer"){
+                        downloadServer = conf.toElement().text().toInt();
+                    }
+                    conf = conf.nextSibling();
+                }
+            }
+            node = node.nextSibling();
+        }
+        f->close();
+    }
+
+    delete f;
+    delete dom;
+}
+
+void UrTUpdater::saveLocalConfig(){
+    QFile *f = new QFile(updaterPath + URT_UPDATER_CFG);
+    QXmlStreamWriter *xml = new QXmlStreamWriter();
+
+    if(!f->open(QFile::WriteOnly)){
+        QMessageBox::critical(0, "Could not write the config file", "Could not write the Updater config file inside of the game folder. Your updater preferences won't be saved.");
+        delete f;
+        return;
+    }
+
+    xml->setDevice(f);
+    xml->writeStartDocument();
+    xml->writeStartElement("UpdaterConfig");
+    xml->writeStartElement("DownloadServer");
+    xml->writeCharacters(QString::number(downloadServer));
+    xml->writeEndElement();
+    xml->writeEndElement();
+    xml->writeEndDocument();
+
+    f->close();
+
+    qDebug() << "Local config saved." << endl;
+
+    delete f;
+    delete xml;
+}
+
 void UrTUpdater::getManifest(QString query){
     QUrl APIUrl(URT_API_LINK);
     QUrlQuery url;
@@ -125,10 +181,10 @@ void UrTUpdater::parseAPIAnswer(){
 
     qDebug() << "apiData: " << apiData << endl;
 
-    parseDOM(apiData);
+    parseManifest(apiData);
 }
 
-void UrTUpdater::parseDOM(QString data){
+void UrTUpdater::parseManifest(QString data){
     QDomDocument* dom = new QDomDocument();
     dom->setContent(data);
 
@@ -160,6 +216,7 @@ void UrTUpdater::parseDOM(QString data){
                     while(!serverListNode.isNull()){
                         if(serverListNode.nodeName() == "Server"){
                             QDomNode serverNode = serverListNode.firstChild();
+                            int     serverId;
                             QString serverURL;
                             QString serverName;
                             QString serverLocation;
@@ -175,9 +232,13 @@ void UrTUpdater::parseDOM(QString data){
                                 if(serverNode.nodeName() == "ServerLocation"){
                                     serverLocation = serverNode.toElement().text();
                                 }
+                                if(serverNode.nodeName() == "ServerId"){
+                                    serverId = serverNode.toElement().text().toInt();
+                                }
                                 serverNode = serverNode.nextSibling();
                             }
 
+                            si.serverId = serverId;
                             si.serverName = serverName;
                             si.serverURL = serverURL;
                             si.serverLocation = serverLocation;
@@ -347,5 +408,6 @@ void UrTUpdater::engineSelection(){
 }
 
 void UrTUpdater::quit(){
+    saveLocalConfig();
     exit(0);
 }

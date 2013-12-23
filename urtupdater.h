@@ -27,10 +27,12 @@ public slots:
     QString getPlatform();
     QString getCurrentPath();
     void getManifest(QString query);
-    void parseDOM(QString data);
+    void parseManifest(QString data);
     QString getMd5Sum(QFile* file);
     void serverSelection();
     void engineSelection();
+    void parseLocalConfig();
+    void saveLocalConfig();
 
 private:
     Ui::UrTUpdater *ui;
@@ -40,6 +42,8 @@ private:
     QString releaseDate;
 
     QString updaterVersion;
+
+    int downloadServer;
 
     QList<fileInfo_s> filesToDownload;
     QList<serverInfo_s>    downloadServers;

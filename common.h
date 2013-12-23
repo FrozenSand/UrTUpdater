@@ -17,10 +17,12 @@
 #include <QComboBox>
 #include <QInputDialog>
 #include <QMenuBar>
+#include <QXmlStreamWriter>
 
 #define URT_GAME_NAME       "Urban Terror"
 #define URT_GAME_SUBDIR     "q3ut4"
 #define URT_API_LINK        "http://barbatos.fr/updater/api.php"
+#define URT_UPDATER_CFG     "updater-cfg.xml"
 
 typedef struct {
     QString fileName;
@@ -30,6 +32,7 @@ typedef struct {
 } fileInfo_s;
 
 typedef struct {
+    int     serverId;
     QString serverName;
     QString serverURL;
     QString serverLocation;

@@ -186,8 +186,6 @@ void UrTUpdater::getManifest(QString query){
     QNetworkRequest apiRequest(APIUrl);
     QNetworkAccessManager *apiManager = new QNetworkAccessManager(this);
 
-    qDebug() << "query: " << query << endl;
-
     apiRequest.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded;charset=utf-8");
     url.addQueryItem("platform", getPlatform());
     url.addQueryItem("query", query);
@@ -200,8 +198,6 @@ void UrTUpdater::getManifest(QString query){
 void UrTUpdater::parseAPIAnswer(){
     QByteArray  apiByteAnswer = apiAnswer->readAll();
     QString     apiData = QString(apiByteAnswer);
-
-    qDebug() << "apiData: " << apiData << endl;
 
     parseManifest(apiData);
 }

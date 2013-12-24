@@ -6,6 +6,7 @@ EngineSelection::EngineSelection(QWidget* parent) : QDialog(parent){
 
 void EngineSelection::init(){
     QList<engineInfo_s>::iterator li;
+    QString currentEngineName;
 
     okButton = new QPushButton(this);
     okButton->setText("Ok");
@@ -28,7 +29,11 @@ void EngineSelection::init(){
         el->addItem(li->engineName);
     }
 
-    el->setCurrentIndex((int)el->findText(getEngineNameById(currentEngine)));
+    currentEngineName = getEngineNameById(currentEngine);
+
+    if(!currentEngineName.isEmpty()){
+        el->setCurrentIndex((int)el->findText(currentEngineName));
+    }
 
     el->move(44, 70);
     el->show();

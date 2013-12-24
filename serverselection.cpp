@@ -6,6 +6,7 @@ ServerSelection::ServerSelection(QWidget *parent) : QDialog(parent) {
 
 void ServerSelection::init(){
     QList<serverInfo_s>::iterator li;
+    QString currentServerName;
 
     okButton = new QPushButton(this);
     okButton->setText("Ok");
@@ -33,7 +34,11 @@ void ServerSelection::init(){
         }
     }
 
-    serverList->setCurrentIndex((int)serverList->findText(getServerNameById(currentServer)));
+    currentServerName = getServerNameById(currentServer);
+
+    if(!currentServerName.isEmpty()){
+        serverList->setCurrentIndex((int)serverList->findText(currentServerName));
+    }
 
     serverList->move(44, 70);
     serverList->show();

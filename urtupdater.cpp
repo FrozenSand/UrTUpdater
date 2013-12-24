@@ -6,8 +6,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     ui->setupUi(this);
 
     updaterVersion = "4.0.1";
-    downloadServer = 0;
-    gameEngine = 0;
+    downloadServer = -1;
+    gameEngine = -1;
     configFileExists = false;
 
     QMenu *menuFile = menuBar()->addMenu("&File");
@@ -396,7 +396,7 @@ void UrTUpdater::checkDownloadServer(){
 
     // If the engine isn't available anymore, pick the first one in the list
     if(!found){
-        downloadServer = downloadServers.takeFirst().serverId;
+        downloadServer = downloadServers.at(0).serverId;
     }
 }
 
@@ -413,7 +413,7 @@ void UrTUpdater::checkGameEngine(){
 
     // If the server isn't a mirror anymore, pick the first one in the list
     if(!found){
-        gameEngine = enginesList.takeFirst().engineId;
+        gameEngine = enginesList.at(0).engineId;
     }
 }
 

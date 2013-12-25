@@ -299,6 +299,34 @@ void UrTUpdater::parseManifest(QString data){
                     }
                 }
 
+                else if(updater.toElement().nodeName() == "VersionList"){
+                    QDomNode versionListNode = updater.firstChild();
+
+                    while(!versionListNode.isNull()){
+                        if(versionListNode.nodeName() == "Version"){
+                            QDomNode versionNode = versionListNode.firstChild();
+                            int     versionId;
+                            QString versionName;
+                            versionInfo_s vi;
+
+                            while(!versionNode.isNull()){
+                                if(versionNode.nodeName() == "VersionName"){
+                                    versionName = versionNode.toElement().text();
+                                }
+                                if(versionNode.nodeName() == "EngineId"){
+                                    versionId = versionNode.toElement().text().toInt();
+                                }
+                                versionNode = versionNode.nextSibling();
+                            }
+
+                            vi.versionId = versionId;
+                            vi.versionName = versionName;
+                            versionsList.append(vi);
+                        }
+                        versionListNode = versionListNode.nextSibling();
+                    }
+                }
+
                 else if(updater.toElement().nodeName() == "Files"){
                     QDomNode files = updater.firstChild();
 

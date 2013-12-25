@@ -44,4 +44,9 @@ typedef struct {
     QString engineDir;
 } engineInfo_s;
 
+typedef struct {
+    int     versionId;
+    QString versionName;
+} versionInfo_s;
+
 #endif // COMMON_H

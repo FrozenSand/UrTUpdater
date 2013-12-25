@@ -54,6 +54,7 @@ private:
     QList<fileInfo_s>       filesToDownload;
     QList<serverInfo_s>     downloadServers;
     QList<engineInfo_s>     enginesList;
+    QList<versionInfo_s>    versionsList;
 };
 
 #endif // URTUPDATER_H

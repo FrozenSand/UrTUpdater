@@ -8,10 +8,14 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     updaterVersion = "4.0.1";
     downloadServer = -1;
     gameEngine = -1;
+    currentVersion = -1;
     configFileExists = false;
 
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
+
+    QAction *actionVersion = menuFile->addAction("&Version Selection");
+    connect(actionVersion, SIGNAL(triggered()), this, SLOT(versionSelection()));
 
     QAction *actionEngine = menuFile->addAction("&Engine Selection");
     connect(actionEngine, SIGNAL(triggered()), this, SLOT(engineSelection()));
@@ -133,6 +137,9 @@ void UrTUpdater::parseLocalConfig(){
                 if(conf.toElement().nodeName() == "GameEngine"){
                     gameEngine = conf.toElement().text().toInt();
                 }
+                if(conf.toElement().nodeName() == "CurrentVersion"){
+                    currentVersion = conf.toElement().text().toInt();
+                }
                 conf = conf.nextSibling();
             }
         }
@@ -167,6 +174,10 @@ void UrTUpdater::saveLocalConfig(){
 
     xml->writeStartElement("GameEngine");
     xml->writeCharacters(QString::number(gameEngine));
+    xml->writeEndElement();
+
+    xml->writeStartElement("CurrentVersion");
+    xml->writeCharacters(QString::number(currentVersion));
     xml->writeEndElement();
 
     xml->writeEndElement();
@@ -313,7 +324,7 @@ void UrTUpdater::parseManifest(QString data){
                                 if(versionNode.nodeName() == "VersionName"){
                                     versionName = versionNode.toElement().text();
                                 }
-                                if(versionNode.nodeName() == "EngineId"){
+                                if(versionNode.nodeName() == "VersionId"){
                                     versionId = versionNode.toElement().text().toInt();
                                 }
                                 versionNode = versionNode.nextSibling();
@@ -403,6 +414,7 @@ void UrTUpdater::parseManifest(QString data){
 
     checkDownloadServer();
     checkGameEngine();
+    checkVersion();
 
     delete dom;
 }
@@ -438,6 +450,23 @@ void UrTUpdater::checkGameEngine(){
     // If the server isn't a mirror anymore, pick the first one in the list
     if(!found){
         gameEngine = enginesList.at(0).engineId;
+    }
+}
+
+void UrTUpdater::checkVersion(){
+    QList<versionInfo_s>::iterator li;
+    bool found = false;
+
+    // Check if the version that is stored in the config file still exists
+    for(li = versionsList.begin(); li != versionsList.end(); ++li){
+        if(li->versionId == currentVersion){
+            found = true;
+        }
+    }
+
+    // If the version isn't available anymore, pick the first one in the list
+    if(!found){
+        currentVersion = versionsList.at(0).versionId;
     }
 }
 
@@ -532,6 +561,17 @@ void UrTUpdater::engineSelection(){
     engineSel->exec();
 }
 
+void UrTUpdater::versionSelection(){
+    VersionSelection* versionSel = new VersionSelection(this);
+
+    connect(versionSel, SIGNAL(versionSelected(int)), this, SLOT(setVersion(int)));
+
+    versionSel->currentVersion = currentVersion;
+    versionSel->versionsList = versionsList;
+    versionSel->init();
+    versionSel->exec();
+}
+
 void UrTUpdater::setDownloadServer(int server){
     downloadServer = server;
     saveLocalConfig();
@@ -539,6 +579,11 @@ void UrTUpdater::setDownloadServer(int server){
 
 void UrTUpdater::setEngine(int engine){
     gameEngine = engine;
+    saveLocalConfig();
+}
+
+void UrTUpdater::setVersion(int version){
+    currentVersion = version;
     saveLocalConfig();
 }
 

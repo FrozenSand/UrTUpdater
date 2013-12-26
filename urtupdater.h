@@ -5,6 +5,7 @@
 #include "common.h"
 #include "serverselection.h"
 #include "engineselection.h"
+#include "versionselection.h"
 
 namespace Ui {
     class UrTUpdater;
@@ -31,12 +32,15 @@ public slots:
     QString getMd5Sum(QFile* file);
     void serverSelection();
     void engineSelection();
+    void versionSelection();
     void parseLocalConfig();
     void saveLocalConfig();
     void checkDownloadServer();
     void checkGameEngine();
+    void checkVersion();
     void setDownloadServer(int);
     void setEngine(int);
+    void setVersion(int);
 
 private:
     Ui::UrTUpdater *ui;
@@ -49,6 +53,7 @@ private:
 
     int downloadServer;
     int gameEngine;
+    int currentVersion;
     bool configFileExists;
 
     QList<fileInfo_s>       filesToDownload;

@@ -15,12 +15,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         urtupdater.cpp \
     serverselection.cpp \
-    engineselection.cpp
+    engineselection.cpp \
+    versionselection.cpp
 
 HEADERS  += urtupdater.h \
     common.h \
     serverselection.h \
-    engineselection.h
+    engineselection.h \
+    versionselection.h
 
 FORMS    += urtupdater.ui
 

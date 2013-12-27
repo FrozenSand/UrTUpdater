@@ -244,6 +244,17 @@ void UrTUpdater::parseManifest(QString data){
                     }
                 }
 
+                else if(updater.toElement().nodeName() == "NewsList"){
+                    QDomNode newsListNode = updater.firstChild();
+
+                    while(!newsListNode.isNull()){
+                        if(newsListNode.nodeName() == "NewsText"){
+                            newsList.append(newsListNode.toElement().text());
+                        }
+                        newsListNode = newsListNode.nextSibling();
+                    }
+                }
+
                 else if(updater.toElement().nodeName() == "ServerList"){
                     QDomNode serverListNode = updater.firstChild();
 
@@ -421,6 +432,8 @@ void UrTUpdater::parseManifest(QString data){
     checkGameEngine();
     checkVersion();
 
+    drawNews();
+
     delete dom;
 }
 
@@ -472,6 +485,21 @@ void UrTUpdater::checkVersion(){
     // If the version isn't available anymore, pick the first one in the list
     if(!found){
         currentVersion = versionsList.at(0).versionId;
+    }
+}
+
+void UrTUpdater::drawNews(){
+    QList<QString>::iterator li;
+    int i = 0;
+
+    for(li = newsList.begin(); li != newsList.end(); ++li, i++){
+        QLabel* news = new QLabel(this);
+
+        news->move(170, 50 + (i*26));
+        news->setMinimumWidth(450);
+        news->setText(*li);
+        news->setOpenExternalLinks(true);
+        news->setVisible(true);
     }
 }
 

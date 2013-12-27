@@ -16,13 +16,15 @@ SOURCES += main.cpp\
         urtupdater.cpp \
     serverselection.cpp \
     engineselection.cpp \
-    versionselection.cpp
+    versionselection.cpp \
+    download.cpp
 
 HEADERS  += urtupdater.h \
     common.h \
     serverselection.h \
     engineselection.h \
-    versionselection.h
+    versionselection.h \
+    download.h
 
 FORMS    += urtupdater.ui
 

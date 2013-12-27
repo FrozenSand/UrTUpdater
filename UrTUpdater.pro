@@ -6,7 +6,7 @@
 
 QT       += core gui network widgets xml
 
-CONFIG   += x86
+CONFIG   += x86 static
 
 TARGET = UrTUpdater
 TEMPLATE = app
@@ -28,3 +28,7 @@ FORMS    += urtupdater.ui
 
 RESOURCES += \
     images.qrc
+
+static {
+    DEFINES += STATIC
+}

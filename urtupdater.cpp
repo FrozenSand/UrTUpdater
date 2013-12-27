@@ -217,6 +217,11 @@ void UrTUpdater::parseManifest(QString data){
     QDomDocument* dom = new QDomDocument();
     dom->setContent(data);
 
+    filesToDownload.clear();
+    downloadServers.clear();
+    enginesList.clear();
+    versionsList.clear();
+
     QDomNode node = dom->firstChild();
 
     while(!node.isNull()){

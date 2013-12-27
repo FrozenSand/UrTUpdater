@@ -6,6 +6,7 @@
 #include "serverselection.h"
 #include "engineselection.h"
 #include "versionselection.h"
+#include "download.h"
 
 namespace Ui {
     class UrTUpdater;
@@ -53,6 +54,9 @@ private:
 
     QString updaterVersion;
     QString password;
+
+    QThread* dlThread;
+    Download* dl;
 
     int downloadServer;
     int gameEngine;

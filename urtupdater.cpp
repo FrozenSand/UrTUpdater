@@ -12,6 +12,12 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     currentVersion = -1;
     configFileExists = false;
 
+    dlThread = new QThread();
+    dl = new Download();
+    dl->moveToThread(dlThread);
+
+    dl->start();
+
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
 

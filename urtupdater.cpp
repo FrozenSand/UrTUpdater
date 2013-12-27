@@ -464,6 +464,7 @@ void UrTUpdater::startDlThread(){
     connect(dl, SIGNAL(dlError(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
     connect(dl, SIGNAL(folderError(QString)), this, SLOT(folderError(QString)));
     connect(dl, SIGNAL(fileDownloaded()), this, SLOT(fileDownloaded()));
+    connect(dl, SIGNAL(bytesDownloaded(int)), this, SLOT(bytesDownloaded(int)));
 
     connect(this, SIGNAL(dlFile(QString,QString)), dl, SLOT(downloadFile(QString, QString)));
 
@@ -646,7 +647,7 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
 }
 
 void UrTUpdater::folderError(QString folder){
-    QMessageBox::critical(this, folder + " folder", "Could not create the folder " + folder + ".\n"
+    QMessageBox::critical(this, folder + " file/folder", "Could not create the file/folder " + folder + ".\n"
                           + "Please move the updater to a folder where it has sufficient permissions.");
     quit();
 }
@@ -722,6 +723,7 @@ QString UrTUpdater::getServerUrlById(int id){
 void UrTUpdater::bytesDownloaded(int bytes){
     downloadedBytes += bytes;
     dlBar->setValue(downloadedBytes);
+    qDebug() << "bytes dl: " << bytes << ", " << downloadedBytes;
 }
 
 void UrTUpdater::quit(){

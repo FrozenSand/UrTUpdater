@@ -11,13 +11,9 @@ void Download::init(){
     downloadInProgress = false;
     downloadedBytes = 0;
 
-    url = new QUrl();
-    url->setHost(downloadServer);
-
     qDebug() << "downloadServer: " << downloadServer;
 
-    http = new QNetworkAccessManager();
-    connect(http, SIGNAL(finished(QNetworkReply*)), this, SLOT(downloadFinished(QNetworkReply*)));
+    http = new QNetworkAccessManager(this);
 }
 
 void Download::setDownloadServer(QString server){
@@ -25,24 +21,18 @@ void Download::setDownloadServer(QString server){
 }
 
 void Download::downloadFile(QString folder, QString file){
-    QUrl fileUrl(*url);
-    QNetworkRequest request;
 
     currentDownload = new QFile(updaterPath + folder + file);
     downloadedBytes = 0;
     currentFile = file;
     currentFolder = folder;
 
-    fileUrl.setPath(downloadServer + folder + file);
-    request.setUrl(fileUrl);
-
-    qDebug() << "file url: " << QString(downloadServer + folder + file);
+    request = QNetworkRequest(QString(downloadServer + folder + file));
 
     // Check if we have to create the folder
     if(!currentFolder.isEmpty() && !QDir().exists(updaterPath + currentFolder)){
         if(!QDir().mkdir(updaterPath + currentFolder)){
             emit folderError(QString(updaterPath + currentFolder));
-            exit(1);
         }
     }
 
@@ -52,24 +42,27 @@ void Download::downloadFile(QString folder, QString file){
     }
 
     // Open the file in write mode
-    currentDownload->open(QIODevice::WriteOnly);
+    if(!currentDownload->open(QIODevice::ReadWrite)){
+        emit folderError(QString(folder + file));
+    }
 
     reply = http->get(request);
-    reply->setReadBufferSize(64 * 2014);
+    reply->setReadBufferSize(64 * 1024);
+    reply->ignoreSslErrors();
     downloadInProgress = true;
 
     connect(reply, SIGNAL(readyRead()), this, SLOT(filePart()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(reply, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
 
 void Download::filePart(){
-    qDebug() << "filePart";
     int count = currentDownload->write(reply->readAll());
     downloadedBytes += count;
     emit bytesDownloaded(count);
 }
 
-void Download::downloadFinished(QNetworkReply* reply){
+void Download::downloadFinished(){
     disconnect(reply, SIGNAL(readyRead()), this, SLOT(filePart()));
     disconnect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     reply->deleteLater();

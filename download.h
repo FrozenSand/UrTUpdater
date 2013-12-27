@@ -17,7 +17,7 @@ public slots:
     void filePart();
     void downloadError(QNetworkReply::NetworkError);
     void downloadFile(QString, QString);
-    void downloadFinished(QNetworkReply*);
+    void downloadFinished();
 
 signals:
     void dlError(QNetworkReply::NetworkError);
@@ -27,9 +27,9 @@ signals:
 
 private:
     QString updaterPath;
-    QUrl* url;
     QString downloadServer;
     QNetworkAccessManager* http;
+    QNetworkRequest request;
     QNetworkReply* reply;
 
     int downloadedBytes;

@@ -41,6 +41,8 @@ public slots:
     void setDownloadServer(int);
     void setEngine(int);
     void setVersion(int);
+    void setPassword(QString);
+    void drawNews();
 
 private:
     Ui::UrTUpdater *ui;
@@ -50,6 +52,7 @@ private:
     QString releaseDate;
 
     QString updaterVersion;
+    QString password;
 
     int downloadServer;
     int gameEngine;
@@ -60,6 +63,7 @@ private:
     QList<serverInfo_s>     downloadServers;
     QList<engineInfo_s>     enginesList;
     QList<versionInfo_s>    versionsList;
+    QList<QString>          newsList;
 };
 
 #endif // URTUPDATER_H

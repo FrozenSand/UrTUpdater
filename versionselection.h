@@ -16,18 +16,24 @@ public:
 
     QList<versionInfo_s> versionsList;
     int currentVersion;
+    QString password;
 
 public slots:
     void okButtonClicked();
+    void passwordEntered();
 
 signals:
     void versionSelected(int);
+    void passwordEntered(QString);
 
 private:
     QPushButton*    okButton;
     QPushButton*    cancelButton;
     QLabel*         selectLabel;
     QComboBox*      versionList;
+    QLabel*         passwordLabel;
+    QLineEdit*      passwordField;
+    QPushButton*    passwordOkButton;
 };
 
 #endif // VERSIONSELECTION_H

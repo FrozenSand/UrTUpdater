@@ -6,6 +6,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     ui->setupUi(this);
 
     updaterVersion = "4.0.1";
+    password = "";
     downloadServer = -1;
     gameEngine = -1;
     currentVersion = -1;
@@ -200,6 +201,7 @@ void UrTUpdater::getManifest(QString query){
     apiRequest.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded;charset=utf-8");
     url.addQueryItem("platform", getPlatform());
     url.addQueryItem("query", query);
+    url.addQueryItem("password", password);
 
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));
@@ -598,9 +600,11 @@ void UrTUpdater::versionSelection(){
     VersionSelection* versionSel = new VersionSelection(this);
 
     connect(versionSel, SIGNAL(versionSelected(int)), this, SLOT(setVersion(int)));
+    connect(versionSel, SIGNAL(passwordEntered(QString)), this, SLOT(setPassword(QString)));
 
     versionSel->currentVersion = currentVersion;
     versionSel->versionsList = versionsList;
+    versionSel->password = password;
     versionSel->init();
     versionSel->exec();
 }
@@ -618,6 +622,12 @@ void UrTUpdater::setEngine(int engine){
 void UrTUpdater::setVersion(int version){
     currentVersion = version;
     saveLocalConfig();
+}
+
+void UrTUpdater::setPassword(QString pw){
+    password = pw;
+    getManifest("versionInfo");
+    versionSelection();
 }
 
 void UrTUpdater::quit(){

@@ -226,6 +226,7 @@ void UrTUpdater::parseManifest(QString data){
     downloadServers.clear();
     enginesList.clear();
     versionsList.clear();
+    newsList.clear();
 
     QDomNode node = dom->firstChild();
 

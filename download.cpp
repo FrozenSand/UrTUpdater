@@ -10,6 +10,7 @@ Download::~Download(){
 void Download::init(){
     downloadInProgress = false;
     downloadedBytes = 0;
+    fileSize = 0;
 
     qDebug() << "downloadServer: " << downloadServer;
 
@@ -20,9 +21,10 @@ void Download::setDownloadServer(QString server){
     downloadServer = server;
 }
 
-void Download::downloadFile(QString folder, QString file){
+void Download::downloadFile(QString folder, QString file, int size){
 
     currentDownload = new QFile(updaterPath + folder + file);
+    fileSize = size;
     downloadedBytes = 0;
     currentFile = file;
     currentFolder = folder;
@@ -51,23 +53,47 @@ void Download::downloadFile(QString folder, QString file){
     reply->ignoreSslErrors();
     downloadInProgress = true;
 
+    downloadTime.start();
+
     connect(reply, SIGNAL(readyRead()), this, SLOT(filePart()));
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
 
 void Download::filePart(){
+    QString unit;
+    qint64 speed;
+    qint64 percentage;
+
     int count = currentDownload->write(reply->readAll());
     downloadedBytes += count;
-    emit bytesDownloaded(count);
+
+    if (downloadedBytes == 0){
+        emit bytesDownloaded(0, 0, "b/s");
+        return;
+    }
+
+    percentage = ((downloadedBytes * 100) / fileSize);
+
+    speed = downloadedBytes * 1000.0 / downloadTime.elapsed();
+
+    if (speed < 1024) {
+        unit = "b/s";
+    } else if (speed < 1024*1024) {
+        speed /= 1024;
+        unit = "kb/s";
+    } else {
+        speed /= 1024*1024;
+        unit = "Mb/s";
+    }
+
+    emit bytesDownloaded(percentage, speed, unit);
 }
 
 void Download::downloadFinished(){
     disconnect(reply, SIGNAL(readyRead()), this, SLOT(filePart()));
     disconnect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     reply->deleteLater();
-
-    qDebug() << "download finished";
 
     if(downloadInProgress){
         downloadInProgress = false;

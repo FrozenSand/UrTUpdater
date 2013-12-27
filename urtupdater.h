@@ -45,14 +45,14 @@ public slots:
     void setPassword(QString);
     void drawNews();
     void folderError(QString);
-    void bytesDownloaded(int);
+    void bytesDownloaded(qint64, qint64, QString);
     QString getServerUrlById(int);
     void downloadFiles();
     void fileDownloaded();
     void startDlThread();
 
 signals:
-    void dlFile(QString, QString);
+    void dlFile(QString, QString, int);
 
 private:
     Ui::UrTUpdater *ui;
@@ -73,8 +73,12 @@ private:
     int currentVersion;
     bool configFileExists;
 
+    int nbFilesToDl;
+    int nbFilesDled;
     int downloadedBytes;
     QProgressBar* dlBar;
+    QLabel* dlText;
+    QLabel* dlSpeed;
 
     QList<fileInfo_s>       filesToDownload;
     QList<serverInfo_s>     downloadServers;

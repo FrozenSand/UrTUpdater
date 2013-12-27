@@ -16,13 +16,13 @@ public slots:
     void init();
     void filePart();
     void downloadError(QNetworkReply::NetworkError);
-    void downloadFile(QString, QString);
+    void downloadFile(QString, QString, int);
     void downloadFinished();
 
 signals:
     void dlError(QNetworkReply::NetworkError);
     void folderError(QString);
-    void bytesDownloaded(int);
+    void bytesDownloaded(qint64, qint64, QString);
     void fileDownloaded();
 
 private:
@@ -33,11 +33,14 @@ private:
     QNetworkReply* reply;
 
     int downloadedBytes;
+    int fileSize;
     bool downloadInProgress;
 
     QString currentFile;
     QString currentFolder;
     QFile* currentDownload;
+
+    QTime downloadTime;
 };
 
 #endif // DOWNLOAD_H

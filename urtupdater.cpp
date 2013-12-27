@@ -10,6 +10,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     downloadServer = -1;
     gameEngine = -1;
     currentVersion = -1;
+    nbFilesToDl = 0;
+    nbFilesDled = 0;
     configFileExists = false;
     threadStarted = false;
 
@@ -39,10 +41,24 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     connect(actionQuitter, SIGNAL(triggered()), this, SLOT(quit()));
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
 
+    dlText = new QLabel(this);
+    dlText->move(150, 372);
+    dlText->setStyleSheet("color:white;");
+    dlText->setMinimumWidth(400);
+    dlText->setText("Getting information from the API...");
+    dlText->show();
+
+    dlSpeed = new QLabel(this);
+    dlSpeed->move(150, 415);
+    dlSpeed->setStyleSheet("color:white;");
+    dlSpeed->setMinimumWidth(400);
+    dlSpeed->hide();
+
     dlBar = new QProgressBar(this);
     dlBar->move(150, 400);
     dlBar->setMinimumWidth(450);
-    dlBar->hide();
+    dlBar->setRange(0, 100);
+    dlBar->show();
 
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
 
@@ -464,9 +480,9 @@ void UrTUpdater::startDlThread(){
     connect(dl, SIGNAL(dlError(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
     connect(dl, SIGNAL(folderError(QString)), this, SLOT(folderError(QString)));
     connect(dl, SIGNAL(fileDownloaded()), this, SLOT(fileDownloaded()));
-    connect(dl, SIGNAL(bytesDownloaded(int)), this, SLOT(bytesDownloaded(int)));
+    connect(dl, SIGNAL(bytesDownloaded(qint64, qint64, QString)), this, SLOT(bytesDownloaded(qint64, qint64, QString)));
 
-    connect(this, SIGNAL(dlFile(QString,QString)), dl, SLOT(downloadFile(QString, QString)));
+    connect(this, SIGNAL(dlFile(QString,QString, int)), dl, SLOT(downloadFile(QString, QString, int)));
 
     threadStarted = true;
     dlThread->start();
@@ -474,39 +490,40 @@ void UrTUpdater::startDlThread(){
 
 void UrTUpdater::downloadFiles(){
     if(filesToDownload.size() <= 0){
-        dlBar->setRange(0, 100);
         dlBar->setValue(100);
-        dlBar->show();
+        dlSpeed->hide();
 
-        qDebug() << "done!";
+        dlText->setText("Your game is up to date!");
         return;
     }
 
     if(filesToDownload.size() > 0){
-        qDebug() << "files to dl";
+        nbFilesToDl = filesToDownload.size();
+        nbFilesDled = 0;
         currentFile = filesToDownload.takeFirst();
-        dlBar->setRange(0, currentFile.fileSize.toInt());
         dlBar->setValue(0);
-        dlBar->show();
+        dlSpeed->show();
 
-        emit dlFile(currentFile.filePath, currentFile.fileName);
+        emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt());
     }
 }
 
 void UrTUpdater::fileDownloaded(){
     if(filesToDownload.size() > 0){
+        nbFilesDled++;
         currentFile = filesToDownload.takeFirst();
-        dlBar->setRange(0, currentFile.fileSize.toInt());
         dlBar->setValue(0);
 
-        emit dlFile(currentFile.filePath, currentFile.fileName);
+        emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt());
     }
 
     else {
-        dlBar->setRange(0, 100);
         dlBar->setValue(100);
-        dlBar->show();
+
         filesToDownload.clear();
+        nbFilesToDl = 0;
+        nbFilesDled = 0;
+
         getManifest("versionInfo");
     }
 }
@@ -720,10 +737,10 @@ QString UrTUpdater::getServerUrlById(int id){
     return "";
 }
 
-void UrTUpdater::bytesDownloaded(int bytes){
-    downloadedBytes += bytes;
-    dlBar->setValue(downloadedBytes);
-    qDebug() << "bytes dl: " << bytes << ", " << downloadedBytes;
+void UrTUpdater::bytesDownloaded(qint64 percentage, qint64 speed, QString unit){
+    dlBar->setValue(percentage);
+    dlText->setText("Downloading: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
+    dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
 }
 
 void UrTUpdater::quit(){

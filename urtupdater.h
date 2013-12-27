@@ -44,6 +44,7 @@ public slots:
     void setVersion(int);
     void setPassword(QString);
     void drawNews();
+    QString getServerNameById(int);
 
 private:
     Ui::UrTUpdater *ui;

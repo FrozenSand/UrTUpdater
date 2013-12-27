@@ -12,12 +12,6 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     currentVersion = -1;
     configFileExists = false;
 
-    dlThread = new QThread();
-    dl = new Download();
-    dl->moveToThread(dlThread);
-
-    dl->start();
-
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
 
@@ -439,8 +433,16 @@ void UrTUpdater::parseManifest(QString data){
     checkDownloadServer();
     checkGameEngine();
     checkVersion();
-
     drawNews();
+
+    dlThread = new QThread();
+    dl = new Download(getServerNameById(downloadServer));
+    dl->moveToThread(dlThread);
+
+    connect(dlThread, SIGNAL(started()), dl, SLOT(init()));
+    connect(dlThread, SIGNAL(finished()), dlThread, SLOT(deleteLater()));
+
+    dlThread->start();
 
     delete dom;
 }
@@ -634,6 +636,18 @@ void UrTUpdater::setPassword(QString pw){
     password = pw;
     getManifest("versionInfo");
     versionSelection();
+}
+
+QString UrTUpdater::getServerNameById(int id){
+    QList<serverInfo_s>::iterator li;
+
+    for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
+        if(li->serverId == id){
+            return li->serverName;
+        }
+    }
+
+    return "";
 }
 
 void UrTUpdater::quit(){

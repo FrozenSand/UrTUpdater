@@ -48,9 +48,11 @@ public slots:
     void bytesDownloaded(int);
     QString getServerUrlById(int);
     void downloadFiles();
+    void fileDownloaded();
+    void startDlThread();
 
 signals:
-    void downloadFile(QString, QString);
+    void dlFile(QString, QString);
 
 private:
     Ui::UrTUpdater *ui;
@@ -64,6 +66,7 @@ private:
 
     QThread* dlThread;
     Download* dl;
+    bool threadStarted;
 
     int downloadServer;
     int gameEngine;

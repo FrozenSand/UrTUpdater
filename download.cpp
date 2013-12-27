@@ -12,7 +12,6 @@ void Download::init(){
     downloadedBytes = 0;
 
     url = new QUrl();
-    url->setScheme("http");
     url->setHost(downloadServer);
 
     qDebug() << "downloadServer: " << downloadServer;
@@ -34,8 +33,10 @@ void Download::downloadFile(QString folder, QString file){
     currentFile = file;
     currentFolder = folder;
 
-    fileUrl.setPath(updaterPath + folder + file);
+    fileUrl.setPath(downloadServer + folder + file);
     request.setUrl(fileUrl);
+
+    qDebug() << "file url: " << QString(downloadServer + folder + file);
 
     // Check if we have to create the folder
     if(!currentFolder.isEmpty() && !QDir().exists(updaterPath + currentFolder)){
@@ -62,9 +63,27 @@ void Download::downloadFile(QString folder, QString file){
 }
 
 void Download::filePart(){
+    qDebug() << "filePart";
     int count = currentDownload->write(reply->readAll());
     downloadedBytes += count;
     emit bytesDownloaded(count);
+}
+
+void Download::downloadFinished(QNetworkReply* reply){
+    disconnect(reply, SIGNAL(readyRead()), this, SLOT(filePart()));
+    disconnect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+    reply->deleteLater();
+
+    qDebug() << "download finished";
+
+    if(downloadInProgress){
+        downloadInProgress = false;
+        currentDownload->close();
+
+        delete currentDownload;
+
+        emit fileDownloaded();
+    }
 }
 
 void Download::downloadError(QNetworkReply::NetworkError code){

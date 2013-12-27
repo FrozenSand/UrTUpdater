@@ -11,6 +11,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     gameEngine = -1;
     currentVersion = -1;
     configFileExists = false;
+    threadStarted = false;
 
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
@@ -439,6 +440,20 @@ void UrTUpdater::parseManifest(QString data){
     checkVersion();
     drawNews();
 
+    if(!threadStarted){
+        startDlThread();
+    }
+
+    downloadFiles();
+
+    delete dom;
+}
+
+void UrTUpdater::startDlThread(){
+    if(threadStarted){
+        return;
+    }
+
     dlThread = new QThread();
     dl = new Download(getServerUrlById(downloadServer), updaterPath);
     dl->moveToThread(dlThread);
@@ -448,32 +463,51 @@ void UrTUpdater::parseManifest(QString data){
 
     connect(dl, SIGNAL(dlError(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
     connect(dl, SIGNAL(folderError(QString)), this, SLOT(folderError(QString)));
+    connect(dl, SIGNAL(fileDownloaded()), this, SLOT(fileDownloaded()));
 
-    connect(this, SIGNAL(downloadFile(QString,QString)), dl, SLOT(downloadFile(QString, QString)));
+    connect(this, SIGNAL(dlFile(QString,QString)), dl, SLOT(downloadFile(QString, QString)));
 
+    threadStarted = true;
     dlThread->start();
-
-    downloadFiles();
-
-    delete dom;
 }
 
 void UrTUpdater::downloadFiles(){
-    if(filesToDownload.isEmpty()){
+    if(filesToDownload.size() <= 0){
         dlBar->setRange(0, 100);
         dlBar->setValue(100);
         dlBar->show();
+
+        qDebug() << "done!";
+        return;
     }
 
     if(filesToDownload.size() > 0){
+        qDebug() << "files to dl";
         currentFile = filesToDownload.takeFirst();
         dlBar->setRange(0, currentFile.fileSize.toInt());
         dlBar->setValue(0);
         dlBar->show();
 
-        emit downloadFile(currentFile.filePath, currentFile.fileName);
+        emit dlFile(currentFile.filePath, currentFile.fileName);
+    }
+}
+
+void UrTUpdater::fileDownloaded(){
+    if(filesToDownload.size() > 0){
+        currentFile = filesToDownload.takeFirst();
+        dlBar->setRange(0, currentFile.fileSize.toInt());
+        dlBar->setValue(0);
+
+        emit dlFile(currentFile.filePath, currentFile.fileName);
     }
 
+    else {
+        dlBar->setRange(0, 100);
+        dlBar->setValue(100);
+        dlBar->show();
+        filesToDownload.clear();
+        getManifest("versionInfo");
+    }
 }
 
 void UrTUpdater::checkDownloadServer(){

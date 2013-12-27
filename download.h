@@ -17,11 +17,13 @@ public slots:
     void filePart();
     void downloadError(QNetworkReply::NetworkError);
     void downloadFile(QString, QString);
+    void downloadFinished(QNetworkReply*);
 
 signals:
     void dlError(QNetworkReply::NetworkError);
     void folderError(QString);
     void bytesDownloaded(int);
+    void fileDownloaded();
 
 private:
     QString updaterPath;

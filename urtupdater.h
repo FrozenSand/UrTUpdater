@@ -44,7 +44,13 @@ public slots:
     void setVersion(int);
     void setPassword(QString);
     void drawNews();
-    QString getServerNameById(int);
+    void folderError(QString);
+    void bytesDownloaded(int);
+    QString getServerUrlById(int);
+    void downloadFiles();
+
+signals:
+    void downloadFile(QString, QString);
 
 private:
     Ui::UrTUpdater *ui;
@@ -64,11 +70,16 @@ private:
     int currentVersion;
     bool configFileExists;
 
+    int downloadedBytes;
+    QProgressBar* dlBar;
+
     QList<fileInfo_s>       filesToDownload;
     QList<serverInfo_s>     downloadServers;
     QList<engineInfo_s>     enginesList;
     QList<versionInfo_s>    versionsList;
     QList<QString>          newsList;
+
+    fileInfo_s currentFile;
 };
 
 #endif // URTUPDATER_H

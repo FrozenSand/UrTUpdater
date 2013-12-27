@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkAccessManager>
 #include <QUrlQuery>
 #include <QDomDocument>
 #include <QCryptographicHash>
@@ -20,6 +21,7 @@
 #include <QXmlStreamWriter>
 #include <QLineEdit>
 #include <QThread>
+#include <QProgressBar>
 
 #define URT_GAME_NAME       "Urban Terror"
 #define URT_GAME_SUBDIR     "q3ut4"

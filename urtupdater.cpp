@@ -38,6 +38,11 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     connect(actionQuitter, SIGNAL(triggered()), this, SLOT(quit()));
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
 
+    dlBar = new QProgressBar(this);
+    dlBar->move(150, 400);
+    dlBar->setMinimumWidth(450);
+    dlBar->hide();
+
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
 
     init();
@@ -71,9 +76,7 @@ void UrTUpdater::init(){
         // Create the game folder
         else {
             if(!QDir().mkdir(updaterPath + URT_GAME_SUBDIR)){
-                QMessageBox::critical(this, QString(URT_GAME_SUBDIR) + " folder", "Could not create the game folder (" + updaterPath + URT_GAME_SUBDIR + ").\n"
-                                      + "Please move the updater to a folder where it has sufficient permissions.");
-                quit();
+                folderError(QString(updaterPath + URT_GAME_SUBDIR));
             }
         }
     }
@@ -436,15 +439,40 @@ void UrTUpdater::parseManifest(QString data){
     drawNews();
 
     dlThread = new QThread();
-    dl = new Download(getServerNameById(downloadServer));
+    dl = new Download(getServerUrlById(downloadServer), updaterPath);
     dl->moveToThread(dlThread);
 
     connect(dlThread, SIGNAL(started()), dl, SLOT(init()));
     connect(dlThread, SIGNAL(finished()), dlThread, SLOT(deleteLater()));
 
+    connect(dl, SIGNAL(dlError(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
+    connect(dl, SIGNAL(folderError(QString)), this, SLOT(folderError(QString)));
+
+    connect(this, SIGNAL(downloadFile(QString,QString)), dl, SLOT(downloadFile(QString, QString)));
+
     dlThread->start();
 
+    downloadFiles();
+
     delete dom;
+}
+
+void UrTUpdater::downloadFiles(){
+    if(filesToDownload.isEmpty()){
+        dlBar->setRange(0, 100);
+        dlBar->setValue(100);
+        dlBar->show();
+    }
+
+    if(filesToDownload.size() > 0){
+        currentFile = filesToDownload.takeFirst();
+        dlBar->setRange(0, currentFile.fileSize.toInt());
+        dlBar->setValue(0);
+        dlBar->show();
+
+        emit downloadFile(currentFile.filePath, currentFile.fileName);
+    }
+
 }
 
 void UrTUpdater::checkDownloadServer(){
@@ -582,6 +610,12 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
     }
 }
 
+void UrTUpdater::folderError(QString folder){
+    QMessageBox::critical(this, folder + " folder", "Could not create the folder " + folder + ".\n"
+                          + "Please move the updater to a folder where it has sufficient permissions.");
+    quit();
+}
+
 void UrTUpdater::serverSelection(){
     ServerSelection *serverSel = new ServerSelection(this);
 
@@ -638,16 +672,21 @@ void UrTUpdater::setPassword(QString pw){
     versionSelection();
 }
 
-QString UrTUpdater::getServerNameById(int id){
+QString UrTUpdater::getServerUrlById(int id){
     QList<serverInfo_s>::iterator li;
 
     for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
         if(li->serverId == id){
-            return li->serverName;
+            return li->serverURL;
         }
     }
 
     return "";
+}
+
+void UrTUpdater::bytesDownloaded(int bytes){
+    downloadedBytes += bytes;
+    dlBar->setValue(downloadedBytes);
 }
 
 void UrTUpdater::quit(){

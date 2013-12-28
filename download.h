@@ -8,7 +8,7 @@ class Download : public QObject
     Q_OBJECT
 
 public:
-    Download(QString, QString);
+    Download(QString, QString, QString);
     ~Download();
     void setDownloadServer(QString);
 
@@ -29,6 +29,7 @@ signals:
 private:
     QString updaterPath;
     QString downloadServer;
+    QString platform;
     QNetworkAccessManager* http;
     QNetworkRequest request;
     QNetworkReply* reply;

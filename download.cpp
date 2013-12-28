@@ -1,6 +1,7 @@
 #include "download.h"
 
-Download::Download(QString server, QString _updaterPath) : downloadServer(server), updaterPath(_updaterPath){
+Download::Download(QString server, QString _updaterPath, QString _platform) :
+    downloadServer(server), updaterPath(_updaterPath), platform(_platform){
 }
 
 Download::~Download(){
@@ -110,6 +111,27 @@ void Download::downloadFinished(){
     if(downloadInProgress){
         downloadInProgress = false;
         currentDownload->close();
+
+        // Apply chmod +x for executable files on linux
+        if((currentFile.contains(".i386", Qt::CaseInsensitive) || (currentFile.contains(".x86_64", Qt::CaseInsensitive))) && (platform == "Linux"))
+        {
+            QString cmd("chmod +x "+currentFile);
+            QProcess* process = new QProcess(this);
+            process->start(QFile::encodeName(cmd).data());
+            process->waitForFinished(3000);
+        }
+
+        if((platform == "Linux") || (platform == "Mac"))
+        {
+            if(currentFile.contains(".zip", Qt::CaseInsensitive))
+            {
+                QString cmd("unzip -o "+updaterPath+currentFile);
+                qDebug() << "cmd: " << cmd;
+                QProcess* process = new QProcess(this);
+                process->start(QFile::encodeName(cmd).data());
+                process->waitForFinished(10000);
+            }
+        }
 
         delete currentDownload;
 

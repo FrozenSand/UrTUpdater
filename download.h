@@ -18,6 +18,7 @@ public slots:
     void downloadError(QNetworkReply::NetworkError);
     void downloadFile(QString, QString, int);
     void downloadFinished();
+    void reconnect();
 
 signals:
     void dlError(QNetworkReply::NetworkError);
@@ -41,6 +42,7 @@ private:
     QFile* currentDownload;
 
     QTime downloadTime;
+    QTimer* timeout;
 };
 
 #endif // DOWNLOAD_H

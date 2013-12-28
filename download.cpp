@@ -12,9 +12,21 @@ void Download::init(){
     downloadedBytes = 0;
     fileSize = 0;
 
-    qDebug() << "downloadServer: " << downloadServer;
+    timeout = new QTimer(this);
 
     http = new QNetworkAccessManager(this);
+
+    connect(timeout, SIGNAL(timeout()), this, SLOT(reconnect()));
+}
+
+void Download::reconnect(){
+    disconnect(timeout, SIGNAL(timeout()), this, SLOT(reconnect()));
+    http->deleteLater();
+
+    http = new QNetworkAccessManager(this);
+    connect(timeout, SIGNAL(timeout()), this, SLOT(reconnect()));
+
+    emit downloadFile(currentFolder, currentFile, fileSize);
 }
 
 void Download::setDownloadServer(QString server){
@@ -56,8 +68,8 @@ void Download::downloadFile(QString folder, QString file, int size){
     downloadTime.start();
 
     connect(reply, SIGNAL(readyRead()), this, SLOT(filePart()));
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
 }
 
 void Download::filePart(){

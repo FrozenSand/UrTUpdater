@@ -57,6 +57,8 @@ signals:
 private:
     Ui::UrTUpdater *ui;
 
+    bool updateInProgress;
+
     QString updaterPath;
     QString versionNumber;
     QString releaseDate;

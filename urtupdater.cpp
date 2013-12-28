@@ -14,6 +14,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     nbFilesDled = 0;
     configFileExists = false;
     threadStarted = false;
+    updateInProgress = false;
 
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
@@ -262,6 +263,8 @@ void UrTUpdater::parseManifest(QString data){
     versionsList.clear();
     newsList.clear();
 
+    dlText->setText("Parsing the answer of the API...");
+
     QDomNode node = dom->firstChild();
 
     while(!node.isNull()){
@@ -397,6 +400,8 @@ void UrTUpdater::parseManifest(QString data){
                 else if(updater.toElement().nodeName() == "Files"){
                     QDomNode files = updater.firstChild();
 
+                    dlText->setText("Checking the game files checksums...");
+
                     while(!files.isNull()){
                         if(files.nodeName() == "File"){
                             QDomNode fileInfo = files.firstChild();
@@ -505,6 +510,7 @@ void UrTUpdater::downloadFiles(){
         dlBar->setValue(100);
         dlSpeed->hide();
         playButton->setStyleSheet("background-color:green;");
+        updateInProgress = false;
         playButton->setDisabled(false);
 
         dlText->setText("Your game is up to date!");
@@ -512,6 +518,7 @@ void UrTUpdater::downloadFiles(){
     }
 
     if(filesToDownload.size() > 0){
+        updateInProgress = true;
         nbFilesToDl = filesToDownload.size();
         nbFilesDled = 0;
         currentFile = filesToDownload.takeFirst();
@@ -684,6 +691,11 @@ void UrTUpdater::folderError(QString folder){
 }
 
 void UrTUpdater::serverSelection(){
+    if(updateInProgress){
+        QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
+        return;
+    }
+
     ServerSelection *serverSel = new ServerSelection(this);
 
     connect(serverSel, SIGNAL(serverSelected(int)), this, SLOT(setDownloadServer(int)));
@@ -695,6 +707,11 @@ void UrTUpdater::serverSelection(){
 }
 
 void UrTUpdater::engineSelection(){
+    if(updateInProgress){
+        QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
+        return;
+    }
+
     EngineSelection* engineSel = new EngineSelection(this);
 
     connect(engineSel, SIGNAL(engineSelected(int)), this, SLOT(setEngine(int)));
@@ -706,6 +723,11 @@ void UrTUpdater::engineSelection(){
 }
 
 void UrTUpdater::versionSelection(){
+    if(updateInProgress){
+        QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
+        return;
+    }
+
     VersionSelection* versionSel = new VersionSelection(this);
 
     connect(versionSel, SIGNAL(versionSelected(int)), this, SLOT(setVersion(int)));

@@ -125,8 +125,7 @@ void Download::downloadFinished(){
         {
             if(currentFile.contains(".zip", Qt::CaseInsensitive))
             {
-                QString cmd("unzip -o "+updaterPath+currentFile);
-                qDebug() << "cmd: " << cmd;
+                QString cmd("unzip -q -o "+updaterPath+currentFile+" -d "+updaterPath);
                 QProcess* process = new QProcess(this);
                 process->start(QFile::encodeName(cmd).data());
                 process->waitForFinished(10000);

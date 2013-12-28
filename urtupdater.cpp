@@ -42,23 +42,40 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
 
     dlText = new QLabel(this);
-    dlText->move(150, 372);
+    dlText->move(150, 262);
     dlText->setStyleSheet("color:white;");
     dlText->setMinimumWidth(400);
     dlText->setText("Getting information from the API...");
     dlText->show();
 
     dlSpeed = new QLabel(this);
-    dlSpeed->move(150, 415);
+    dlSpeed->move(150, 305);
     dlSpeed->setStyleSheet("color:white;");
     dlSpeed->setMinimumWidth(400);
     dlSpeed->hide();
 
     dlBar = new QProgressBar(this);
-    dlBar->move(150, 400);
+    dlBar->move(150, 290);
     dlBar->setMinimumWidth(450);
     dlBar->setRange(0, 100);
     dlBar->show();
+
+    playButton = new QPushButton(this);
+    playButton->move(400, 385);
+    playButton->setMinimumWidth(200);
+    playButton->setMinimumHeight(50);
+    playButton->setStyleSheet("background-color:orange;");
+    playButton->setText("Play!");
+    playButton->setDisabled(true);
+    playButton->show();
+
+    changelogButton = new QPushButton(this);
+    changelogButton->move(150, 385);
+    changelogButton->setMinimumWidth(200);
+    changelogButton->setMinimumHeight(50);
+    changelogButton->setStyleSheet("background-color:gray;");
+    changelogButton->setText("Changelog");
+    changelogButton->show();
 
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
 
@@ -423,13 +440,8 @@ void UrTUpdater::parseManifest(QString data){
                             else if(!fileName.isEmpty() && !fileMd5.isEmpty()){
                                 if(getMd5Sum(f) != fileMd5){
                                     mustDownload = true;
-                                    qDebug() << "md5 file: " << getMd5Sum(f) << ", " << fileMd5 << endl;
                                 }
                             }
-
-                            qDebug() << "fileDir:" << fileDir << endl;
-                            qDebug() << "fileName: " << fileName << endl;
-                            qDebug() << "fileMd5: " << fileMd5 << endl;
 
                             if(mustDownload){
                                 fileInfo_s fi;
@@ -471,7 +483,7 @@ void UrTUpdater::startDlThread(){
     }
 
     dlThread = new QThread();
-    dl = new Download(getServerUrlById(downloadServer), updaterPath);
+    dl = new Download(getServerUrlById(downloadServer), updaterPath, getPlatform());
     dl->moveToThread(dlThread);
 
     connect(dlThread, SIGNAL(started()), dl, SLOT(init()));
@@ -492,6 +504,8 @@ void UrTUpdater::downloadFiles(){
     if(filesToDownload.size() <= 0){
         dlBar->setValue(100);
         dlSpeed->hide();
+        playButton->setStyleSheet("background-color:green;");
+        playButton->setDisabled(false);
 
         dlText->setText("Your game is up to date!");
         return;

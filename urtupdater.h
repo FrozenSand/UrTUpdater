@@ -80,6 +80,9 @@ private:
     QLabel* dlText;
     QLabel* dlSpeed;
 
+    QPushButton* playButton;
+    QPushButton* changelogButton;
+
     QList<fileInfo_s>       filesToDownload;
     QList<serverInfo_s>     downloadServers;
     QList<engineInfo_s>     enginesList;

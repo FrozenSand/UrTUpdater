@@ -1,3 +1,5 @@
+// menu "mise à jour auto ou manuelle"
+
 #include "urtupdater.h"
 #include "ui_urtupdater.h"
 
@@ -65,9 +67,10 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     playButton->move(400, 385);
     playButton->setMinimumWidth(200);
     playButton->setMinimumHeight(50);
-    playButton->setStyleSheet("background-color:orange;");
     playButton->setText("Play!");
+    playButton->setStyleSheet("background-color:#727272;color:white;");
     playButton->setDisabled(true);
+    playButton->setIconSize(QSize(40, 40));
     playButton->show();
 
     changelogButton = new QPushButton(this);
@@ -78,9 +81,25 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     changelogButton->setText("Changelog");
     changelogButton->show();
 
+    loaderAnim = new QMovie(":/images/urt_updating.gif");
+    connect(loaderAnim, SIGNAL(frameChanged(int)), this, SLOT(setLoadingIcon(int)));
+
+    playAnim = new QMovie(":/images/urt_play.gif");
+    connect(playAnim, SIGNAL(frameChanged(int)), this, SLOT(setPlayIcon(int)));
+
+    playAnim->start();
+
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
 
     init();
+}
+
+void UrTUpdater::setLoadingIcon(int){
+    playButton->setIcon(QIcon(loaderAnim->currentPixmap()));
+}
+
+void UrTUpdater::setPlayIcon(int){
+    playButton->setIcon(QIcon(playAnim->currentPixmap()));
 }
 
 UrTUpdater::~UrTUpdater()
@@ -509,9 +528,11 @@ void UrTUpdater::downloadFiles(){
     if(filesToDownload.size() <= 0){
         dlBar->setValue(100);
         dlSpeed->hide();
-        playButton->setStyleSheet("background-color:green;");
         updateInProgress = false;
         playButton->setDisabled(false);
+        loaderAnim->stop();
+        playAnim->start();
+        playButton->setText("Play!");
 
         dlText->setText("Your game is up to date!");
         return;
@@ -524,6 +545,9 @@ void UrTUpdater::downloadFiles(){
         currentFile = filesToDownload.takeFirst();
         dlBar->setValue(0);
         dlSpeed->show();
+        loaderAnim->start();
+        playAnim->stop();
+        playButton->setText("Updating...");
 
         emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt());
     }

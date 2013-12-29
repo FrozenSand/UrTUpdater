@@ -24,6 +24,7 @@
 #include <QProgressBar>
 #include <QTimer>
 #include <QProcess>
+#include <QMovie>
 
 #define URT_GAME_NAME       "Urban Terror"
 #define URT_GAME_SUBDIR     "q3ut4"

@@ -50,6 +50,8 @@ public slots:
     void downloadFiles();
     void fileDownloaded();
     void startDlThread();
+    void setLoadingIcon(int);
+    void setPlayIcon(int);
 
 signals:
     void dlFile(QString, QString, int);
@@ -92,6 +94,9 @@ private:
     QList<QString>          newsList;
 
     fileInfo_s currentFile;
+
+    QMovie* loaderAnim;
+    QMovie* playAnim;
 };
 
 #endif // URTUPDATER_H

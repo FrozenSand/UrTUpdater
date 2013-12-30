@@ -34,7 +34,7 @@ public slots:
     void okButtonClicked();
 
 signals:
-    void settingsUpdated(int, int, int, QString);
+    void settingsUpdated(int, int, int);
 
 private:
     QPushButton*    okButton;
@@ -48,10 +48,6 @@ private:
     QLabel*         versionLabel;
     QLabel*         serverLabel;
     QLabel*         engineLabel;
-
-    QLabel*         passwordLabel;
-    QLineEdit*      passwordField;
-    QPushButton*    passwordOkButton;
 
 };
 

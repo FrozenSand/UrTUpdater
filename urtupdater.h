@@ -42,7 +42,7 @@ public slots:
     void checkVersion();
 
     void openSettings();
-    void setSettings(int, int, int, QString);
+    void setSettings(int, int, int);
     void drawNews();
 
     void bytesDownloaded(qint64, qint64, QString);

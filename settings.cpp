@@ -41,30 +41,6 @@ void Settings::init(){
     engineLabel->move(30, 160);
     engineLabel->show();
 
-    /*selectLabel = new QLabel(this);
-    selectLabel->setText("Select the version that you want to download:");
-    selectLabel->move(45, 30);
-    selectLabel->show();
-
-    passwordLabel = new QLabel(this);
-    passwordLabel->setText("If you are a developer or tester, enter your password:");
-    passwordLabel->move(45, 130);
-    passwordLabel->show();
-
-    passwordField = new QLineEdit(this);
-    passwordField->setEchoMode(QLineEdit::Password);
-    passwordField->move(45, 155);
-
-    if(!password.isEmpty()){
-        passwordField->setText(password);
-    }
-    passwordField->show();
-
-    passwordOkButton = new QPushButton(this);
-    passwordOkButton->setText("Ok");
-    passwordOkButton->move(195, 152);
-    passwordOkButton->show();
-    */
 
     versionList = new QComboBox(this);
 
@@ -118,7 +94,6 @@ void Settings::init(){
 
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
-    //connect(passwordOkButton, SIGNAL(clicked()), this, SLOT(passwordEntered()));
 
     setWindowTitle("Settings");
     setFixedSize(450, 300);
@@ -129,13 +104,12 @@ void Settings::okButtonClicked(){
     int idVersion   = getVersionIdByName(versionList->itemText(versionList->currentIndex()));
     int idServer    = getServerIdByName(serverList->itemText(serverList->currentIndex()));
     int idEngine    = getEngineIdByName(engineList->itemText(engineList->currentIndex()));
-    QString pw      = passwordField->text();
 
     if(idVersion == -1 || idServer == -1 || idEngine == -1){
         return;
     }
 
-    emit settingsUpdated(idVersion, idEngine, idServer, pw);
+    emit settingsUpdated(idVersion, idEngine, idServer);
     close();
 }
 

@@ -716,7 +716,7 @@ void UrTUpdater::openSettings(){
 
     Settings *settings = new Settings(this);
 
-    connect(settings, SIGNAL(settingsUpdated(int,int,int,QString)), this, SLOT(setSettings(int,int,int,QString)));
+    connect(settings, SIGNAL(settingsUpdated(int,int,int)), this, SLOT(setSettings(int,int,int)));
 
     settings->currentServer = downloadServer;
     settings->currentVersion = currentVersion;
@@ -731,11 +731,10 @@ void UrTUpdater::openSettings(){
     settings->exec();
 }
 
-void UrTUpdater::setSettings(int version, int engine, int server, QString pw){
+void UrTUpdater::setSettings(int version, int engine, int server){
     gameEngine = engine;
     currentVersion = version;
     downloadServer = server;
-    password = pw;
     saveLocalConfig();
 }
 

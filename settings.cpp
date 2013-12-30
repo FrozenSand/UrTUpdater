@@ -18,13 +18,28 @@ void Settings::init(){
 
     okButton = new QPushButton(this);
     okButton->setText("Ok");
-    okButton->move(377, 210);
+    okButton->move(377, 260);
     okButton->show();
 
     cancelButton = new QPushButton(this);
     cancelButton->setText("Go back");
-    cancelButton->move(280, 210);
+    cancelButton->move(280, 260);
     cancelButton->show();
+
+    versionLabel = new QLabel(this);
+    versionLabel->setText("Select the version that you want to download:");
+    versionLabel->move(30, 20);
+    versionLabel->show();
+
+    serverLabel = new QLabel(this);
+    serverLabel->setText("Select a download mirror depending on your location:");
+    serverLabel->move(30, 90);
+    serverLabel->show();
+
+    engineLabel = new QLabel(this);
+    engineLabel->setText("Select the game engine that you want to use to run the game:");
+    engineLabel->move(30, 160);
+    engineLabel->show();
 
     /*selectLabel = new QLabel(this);
     selectLabel->setText("Select the version that you want to download:");
@@ -63,7 +78,7 @@ void Settings::init(){
         versionList->setCurrentIndex((int)versionList->findText(currentVersionName));
     }
 
-    versionList->move(44, 70);
+    versionList->move(29, 40);
     versionList->show();
 
     serverList = new QComboBox(this);
@@ -83,7 +98,7 @@ void Settings::init(){
         serverList->setCurrentIndex((int)serverList->findText(currentServerName));
     }
 
-    serverList->move(44, 70);
+    serverList->move(29, 110);
     serverList->show();
 
     engineList = new QComboBox(this);
@@ -98,7 +113,7 @@ void Settings::init(){
         engineList->setCurrentIndex((int)engineList->findText(currentEngineName));
     }
 
-    engineList->move(44, 70);
+    engineList->move(29, 180);
     engineList->show();
 
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
@@ -106,7 +121,7 @@ void Settings::init(){
     //connect(passwordOkButton, SIGNAL(clicked()), this, SLOT(passwordEntered()));
 
     setWindowTitle("Settings");
-    setFixedSize(450, 250);
+    setFixedSize(450, 300);
     setModal(true);
 }
 

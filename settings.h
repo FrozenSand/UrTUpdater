@@ -45,6 +45,10 @@ private:
     QComboBox*      serverList;
     QComboBox*      engineList;
 
+    QLabel*         versionLabel;
+    QLabel*         serverLabel;
+    QLabel*         engineLabel;
+
     QLabel*         passwordLabel;
     QLineEdit*      passwordField;
     QPushButton*    passwordOkButton;

@@ -192,6 +192,9 @@ void UrTUpdater::parseLocalConfig(){
                 if(conf.toElement().nodeName() == "CurrentVersion"){
                     currentVersion = conf.toElement().text().toInt();
                 }
+                if(conf.toElement().nodeName() == "AskBeforeUpdating"){
+                    askBeforeUpdating = conf.toElement().text().toInt();
+                }
                 conf = conf.nextSibling();
             }
         }
@@ -230,6 +233,10 @@ void UrTUpdater::saveLocalConfig(){
 
     xml->writeStartElement("CurrentVersion");
     xml->writeCharacters(QString::number(currentVersion));
+    xml->writeEndElement();
+
+    xml->writeStartElement("AskBeforeUpdating");
+    xml->writeCharacters(QString::number(askBeforeUpdating));
     xml->writeEndElement();
 
     xml->writeEndElement();
@@ -519,6 +526,7 @@ void UrTUpdater::startDlThread(){
 }
 
 void UrTUpdater::downloadFiles(){
+
     if(filesToDownload.size() <= 0){
         dlBar->setValue(100);
         dlSpeed->hide();
@@ -533,6 +541,23 @@ void UrTUpdater::downloadFiles(){
     }
 
     if(filesToDownload.size() > 0){
+
+        if(askBeforeUpdating){
+            QMessageBox msg;
+            int result;
+
+            msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            msg.setIcon(QMessageBox::Information);
+            msg.setText("A new update is available. Would you like to download it now?");
+            result = msg.exec();
+
+            if(result == QMessageBox::Cancel){
+                playButton->setDisabled(false);
+                dlText->setText("Your game is outdated!");
+                return;
+            }
+        }
+
         updateInProgress = true;
         nbFilesToDl = filesToDownload.size();
         nbFilesDled = 0;
@@ -716,25 +741,26 @@ void UrTUpdater::openSettings(){
 
     Settings *settings = new Settings(this);
 
-    connect(settings, SIGNAL(settingsUpdated(int,int,int)), this, SLOT(setSettings(int,int,int)));
+    connect(settings, SIGNAL(settingsUpdated(int,int,int,int)), this, SLOT(setSettings(int,int,int,int)));
 
     settings->currentServer = downloadServer;
     settings->currentVersion = currentVersion;
     settings->currentEngine = gameEngine;
+    settings->currentUpdateBehavior = askBeforeUpdating;
 
     settings->downloadServers = downloadServers;
     settings->enginesList = enginesList;
     settings->versionsList = versionsList;
 
-    settings->password = password;
     settings->init();
     settings->exec();
 }
 
-void UrTUpdater::setSettings(int version, int engine, int server){
+void UrTUpdater::setSettings(int version, int engine, int server, int updateType){
     gameEngine = engine;
     currentVersion = version;
     downloadServer = server;
+    askBeforeUpdating = updateType;
     saveLocalConfig();
 }
 

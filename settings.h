@@ -28,13 +28,13 @@ public:
     int currentServer;
     int currentEngine;
 
-    QString password;
+    int currentUpdateBehavior;
 
 public slots:
     void okButtonClicked();
 
 signals:
-    void settingsUpdated(int, int, int);
+    void settingsUpdated(int, int, int, int);
 
 private:
     QPushButton*    okButton;
@@ -44,10 +44,12 @@ private:
     QComboBox*      versionList;
     QComboBox*      serverList;
     QComboBox*      engineList;
+    QComboBox*      updateBehaviorList;
 
     QLabel*         versionLabel;
     QLabel*         serverLabel;
     QLabel*         engineLabel;
+    QLabel*         updateLabel;
 
 };
 

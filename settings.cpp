@@ -18,12 +18,12 @@ void Settings::init(){
 
     okButton = new QPushButton(this);
     okButton->setText("Ok");
-    okButton->move(377, 260);
+    okButton->move(377, 310);
     okButton->show();
 
     cancelButton = new QPushButton(this);
     cancelButton->setText("Go back");
-    cancelButton->move(280, 260);
+    cancelButton->move(280, 310);
     cancelButton->show();
 
     versionLabel = new QLabel(this);
@@ -41,6 +41,10 @@ void Settings::init(){
     engineLabel->move(30, 160);
     engineLabel->show();
 
+    updateLabel = new QLabel(this);
+    updateLabel->setText("Select how the Updater will behave when there is a new update:");
+    updateLabel->move(30, 230);
+    updateLabel->show();
 
     versionList = new QComboBox(this);
 
@@ -92,11 +96,22 @@ void Settings::init(){
     engineList->move(29, 180);
     engineList->show();
 
+    updateBehaviorList = new QComboBox(this);
+    updateBehaviorList->addItem(QString("Auto-update (default)"));
+    updateBehaviorList->addItem(QString("Ask before updating"));
+
+    if(currentUpdateBehavior){
+        updateBehaviorList->setCurrentIndex(currentUpdateBehavior);
+    }
+
+    updateBehaviorList->move(29, 250);
+    updateBehaviorList->show();
+
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
 
     setWindowTitle("Settings");
-    setFixedSize(450, 300);
+    setFixedSize(450, 350);
     setModal(true);
 }
 
@@ -104,12 +119,13 @@ void Settings::okButtonClicked(){
     int idVersion   = getVersionIdByName(versionList->itemText(versionList->currentIndex()));
     int idServer    = getServerIdByName(serverList->itemText(serverList->currentIndex()));
     int idEngine    = getEngineIdByName(engineList->itemText(engineList->currentIndex()));
+    int idUpdate    = updateBehaviorList->currentIndex();
 
-    if(idVersion == -1 || idServer == -1 || idEngine == -1){
+    if(idVersion == -1 || idServer == -1 || idEngine == -1 || idUpdate == -1){
         return;
     }
 
-    emit settingsUpdated(idVersion, idEngine, idServer);
+    emit settingsUpdated(idVersion, idEngine, idServer, idUpdate);
     close();
 }
 

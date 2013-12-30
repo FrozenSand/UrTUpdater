@@ -42,7 +42,7 @@ public slots:
     void checkVersion();
 
     void openSettings();
-    void setSettings(int, int, int);
+    void setSettings(int, int, int, int);
     void drawNews();
 
     void bytesDownloaded(qint64, qint64, QString);
@@ -77,6 +77,7 @@ private:
     int downloadServer;
     int gameEngine;
     int currentVersion;
+    int askBeforeUpdating;
     bool configFileExists;
 
     int nbFilesToDl;

@@ -93,22 +93,11 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 
     playAnim->start();
 
+    connect(playButton, SIGNAL(clicked()), this, SLOT(launchGame()));
+
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
 
     init();
-}
-
-void UrTUpdater::setLoadingIcon(int){
-    playButton->setIcon(QIcon(loaderAnim->currentPixmap()));
-}
-
-void UrTUpdater::setPlayIcon(int){
-    playButton->setIcon(QIcon(playAnim->currentPixmap()));
-}
-
-UrTUpdater::~UrTUpdater()
-{
-    delete ui;
 }
 
 void UrTUpdater::init(){
@@ -375,6 +364,7 @@ void UrTUpdater::parseManifest(QString data){
                             int     engineId;
                             QString engineDir;
                             QString engineName;
+                            QString engineLaunchString;
                             engineInfo_s ei;
 
                             while(!engineNode.isNull()){
@@ -387,12 +377,16 @@ void UrTUpdater::parseManifest(QString data){
                                 if(engineNode.nodeName() == "EngineId"){
                                     engineId = engineNode.toElement().text().toInt();
                                 }
+                                if(engineNode.nodeName() == "EngineLaunchString"){
+                                    engineLaunchString = engineNode.toElement().text();
+                                }
                                 engineNode = engineNode.nextSibling();
                             }
 
                             ei.engineId = engineId;
                             ei.engineName = engineName;
                             ei.engineDir = engineDir;
+                            ei.engineLaunchString = engineLaunchString;
                             enginesList.append(ei);
                         }
                         engineListNode = engineListNode.nextSibling();
@@ -582,6 +576,12 @@ void UrTUpdater::downloadFiles(){
     }
 }
 
+void UrTUpdater::bytesDownloaded(qint64 percentage, qint64 speed, QString unit){
+    dlBar->setValue(percentage);
+    dlText->setText("Downloading: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
+    dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
+}
+
 void UrTUpdater::fileDownloaded(){
     if(filesToDownload.size() > 0){
         nbFilesDled++;
@@ -666,20 +666,6 @@ void UrTUpdater::drawNews(){
         news->setOpenExternalLinks(true);
         news->setVisible(true);
     }
-}
-
-QString UrTUpdater::getMd5Sum(QFile* file)
-{
-    if (file->exists() && file->open(QIODevice::ReadOnly))
-    {
-        QByteArray content = file->readAll();
-        QByteArray hashed = QCryptographicHash::hash(content, QCryptographicHash::Md5);
-        file->close();
-
-        return hashed.toHex().data();
-    }
-
-    return "";
 }
 
 void UrTUpdater::networkError(QNetworkReply::NetworkError code){
@@ -775,6 +761,44 @@ void UrTUpdater::setSettings(int version, int engine, int server, int updateType
     getManifest("versionInfo");
 }
 
+void UrTUpdater::launchGame(){
+    QProcess process;
+    QString launchString = getEngineLaunchStringById(gameEngine);
+    QString platform = getPlatform();
+    QString s;
+
+    if(platform == "Mac"){
+        s = "open " + updaterPath + launchString;
+    }
+    else {
+        s = "." + updaterPath + launchString;
+    }
+    process.startDetached( s );
+    process.waitForStarted();
+}
+
+void UrTUpdater::setLoadingIcon(int){
+    playButton->setIcon(QIcon(loaderAnim->currentPixmap()));
+}
+
+void UrTUpdater::setPlayIcon(int){
+    playButton->setIcon(QIcon(playAnim->currentPixmap()));
+}
+
+QString UrTUpdater::getMd5Sum(QFile* file)
+{
+    if (file->exists() && file->open(QIODevice::ReadOnly))
+    {
+        QByteArray content = file->readAll();
+        QByteArray hashed = QCryptographicHash::hash(content, QCryptographicHash::Md5);
+        file->close();
+
+        return hashed.toHex().data();
+    }
+
+    return "";
+}
+
 QString UrTUpdater::getServerUrlById(int id){
     QList<serverInfo_s>::iterator li;
 
@@ -787,13 +811,23 @@ QString UrTUpdater::getServerUrlById(int id){
     return "";
 }
 
-void UrTUpdater::bytesDownloaded(qint64 percentage, qint64 speed, QString unit){
-    dlBar->setValue(percentage);
-    dlText->setText("Downloading: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
-    dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
+QString UrTUpdater::getEngineLaunchStringById(int id){
+    QList<engineInfo_s>::iterator li;
+
+    for(li = enginesList.begin(); li != enginesList.end(); ++li){
+        if(li->engineId == id){
+            return li->engineLaunchString;
+        }
+    }
+
+    return "";
 }
 
 void UrTUpdater::quit(){
     saveLocalConfig();
     exit(0);
+}
+
+UrTUpdater::~UrTUpdater(){
+    delete ui;
 }

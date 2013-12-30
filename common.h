@@ -49,6 +49,7 @@ typedef struct {
     int     engineId;
     QString engineName;
     QString engineDir;
+    QString engineLaunchString;
 } engineInfo_s;
 
 typedef struct {

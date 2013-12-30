@@ -32,6 +32,7 @@ public slots:
     void parseManifest(QString data);
 
     QString getServerUrlById(int);
+    QString getEngineLaunchStringById(int id);
     QString getMd5Sum(QFile* file);
 
     void parseLocalConfig();
@@ -54,6 +55,8 @@ public slots:
 
     void folderError(QString);
     void networkError(QNetworkReply::NetworkError);
+
+    void launchGame();
 
 signals:
     void dlFile(QString, QString, int);

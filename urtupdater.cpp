@@ -18,6 +18,16 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     threadStarted = false;
     updateInProgress = false;
 
+    QStringList arguments = QCoreApplication::arguments();
+    if(arguments.count() >= 1) {
+        for(int i = 0; i < arguments.count(); i++) {
+            if(arguments.at(i) == "--password" && (i + 1 < arguments.count()) ) {
+                i++;
+                password = arguments.at( i );
+            }
+        }
+    }
+
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
 
@@ -650,7 +660,7 @@ void UrTUpdater::drawNews(){
     for(li = newsList.begin(); li != newsList.end(); ++li, i++){
         QLabel* news = new QLabel(this);
 
-        news->move(170, 50 + (i*26));
+        news->move(150, 65 + (i*26));
         news->setMinimumWidth(450);
         news->setText(*li);
         news->setOpenExternalLinks(true);

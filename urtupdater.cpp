@@ -762,6 +762,7 @@ void UrTUpdater::setSettings(int version, int engine, int server, int updateType
     downloadServer = server;
     askBeforeUpdating = updateType;
     saveLocalConfig();
+    getManifest("versionInfo");
 }
 
 QString UrTUpdater::getServerUrlById(int id){

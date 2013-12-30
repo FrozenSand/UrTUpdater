@@ -21,14 +21,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     QMenu *menuFile = menuBar()->addMenu("&File");
     QMenu *menuHelp = menuBar()->addMenu("&Help");
 
-    QAction *actionVersion = menuFile->addAction("&Version Selection");
-    connect(actionVersion, SIGNAL(triggered()), this, SLOT(versionSelection()));
-
-    QAction *actionEngine = menuFile->addAction("&Engine Selection");
-    connect(actionEngine, SIGNAL(triggered()), this, SLOT(engineSelection()));
-
-    QAction *actionDlServer = menuFile->addAction("&Download Server Selection");
-    connect(actionDlServer, SIGNAL(triggered()), this, SLOT(serverSelection()));
+    QAction *actionSettings = menuFile->addAction("&Settings");
+    connect(actionSettings, SIGNAL(triggered()), this, SLOT(openSettings()));
 
     QAction *actionChangelog = menuFile->addAction("&Changelog");
     //connect(actionChangelog, SIGNAL(triggered()), this, SLOT(openChangelogPage()));
@@ -714,75 +708,35 @@ void UrTUpdater::folderError(QString folder){
     quit();
 }
 
-void UrTUpdater::serverSelection(){
+void UrTUpdater::openSettings(){
     if(updateInProgress){
         QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
         return;
     }
 
-    ServerSelection *serverSel = new ServerSelection(this);
+    Settings *settings = new Settings(this);
 
-    connect(serverSel, SIGNAL(serverSelected(int)), this, SLOT(setDownloadServer(int)));
+    connect(settings, SIGNAL(settingsUpdated(int,int,int)), this, SLOT(setSettings(int,int,int)));
 
-    serverSel->currentServer = downloadServer;
-    serverSel->downloadServers = downloadServers;
-    serverSel->init();
-    serverSel->exec();
+    settings->currentServer = downloadServer;
+    settings->currentVersion = currentVersion;
+    settings->currentEngine = gameEngine;
+
+    settings->downloadServers = downloadServers;
+    settings->enginesList = enginesList;
+    settings->versionsList = versionsList;
+
+    settings->password = password;
+    settings->init();
+    settings->exec();
 }
 
-void UrTUpdater::engineSelection(){
-    if(updateInProgress){
-        QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
-        return;
-    }
-
-    EngineSelection* engineSel = new EngineSelection(this);
-
-    connect(engineSel, SIGNAL(engineSelected(int)), this, SLOT(setEngine(int)));
-
-    engineSel->currentEngine = gameEngine;
-    engineSel->enginesList = enginesList;
-    engineSel->init();
-    engineSel->exec();
-}
-
-void UrTUpdater::versionSelection(){
-    if(updateInProgress){
-        QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
-        return;
-    }
-
-    VersionSelection* versionSel = new VersionSelection(this);
-
-    connect(versionSel, SIGNAL(versionSelected(int)), this, SLOT(setVersion(int)));
-    connect(versionSel, SIGNAL(passwordEntered(QString)), this, SLOT(setPassword(QString)));
-
-    versionSel->currentVersion = currentVersion;
-    versionSel->versionsList = versionsList;
-    versionSel->password = password;
-    versionSel->init();
-    versionSel->exec();
-}
-
-void UrTUpdater::setDownloadServer(int server){
-    downloadServer = server;
-    saveLocalConfig();
-}
-
-void UrTUpdater::setEngine(int engine){
+void UrTUpdater::setSettings(int version, int engine, int server, QString pw){
     gameEngine = engine;
-    saveLocalConfig();
-}
-
-void UrTUpdater::setVersion(int version){
     currentVersion = version;
-    saveLocalConfig();
-}
-
-void UrTUpdater::setPassword(QString pw){
+    downloadServer = server;
     password = pw;
-    getManifest("versionInfo");
-    versionSelection();
+    saveLocalConfig();
 }
 
 QString UrTUpdater::getServerUrlById(int id){

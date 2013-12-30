@@ -7,6 +7,7 @@
 #include "engineselection.h"
 #include "versionselection.h"
 #include "download.h"
+#include "settings.h"
 
 namespace Ui {
     class UrTUpdater;
@@ -22,36 +23,40 @@ public:
     QNetworkReply *apiAnswer;
 
 public slots:
-    void parseAPIAnswer();
-    void networkError(QNetworkReply::NetworkError);
     void quit();
     void init();
+    void startDlThread();
+
     QString getPlatform();
     QString getCurrentPath();
+
+    void parseAPIAnswer();
     void getManifest(QString query);
     void parseManifest(QString data);
+
+    QString getServerUrlById(int);
     QString getMd5Sum(QFile* file);
-    void serverSelection();
-    void engineSelection();
-    void versionSelection();
+
     void parseLocalConfig();
     void saveLocalConfig();
+
     void checkDownloadServer();
     void checkGameEngine();
     void checkVersion();
-    void setDownloadServer(int);
-    void setEngine(int);
-    void setVersion(int);
-    void setPassword(QString);
+
+    void openSettings();
+    void setSettings(int, int, int, QString);
     void drawNews();
-    void folderError(QString);
+
     void bytesDownloaded(qint64, qint64, QString);
-    QString getServerUrlById(int);
     void downloadFiles();
     void fileDownloaded();
-    void startDlThread();
+
     void setLoadingIcon(int);
     void setPlayIcon(int);
+
+    void folderError(QString);
+    void networkError(QNetworkReply::NetworkError);
 
 signals:
     void dlFile(QString, QString, int);

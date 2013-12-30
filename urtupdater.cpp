@@ -62,7 +62,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     playButton->setMinimumWidth(200);
     playButton->setMinimumHeight(50);
     playButton->setText("Play!");
-    playButton->setStyleSheet("background-color:#727272;color:white;");
+    playButton->setStyleSheet("padding-bottom: 2px; color: white;font-weight: bold; font-size: 120%; text-transform: uppercase;background-color:#727272;height:50px;");
     playButton->setDisabled(true);
     playButton->setIconSize(QSize(40, 40));
     playButton->show();
@@ -71,7 +71,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     changelogButton->move(150, 385);
     changelogButton->setMinimumWidth(200);
     changelogButton->setMinimumHeight(50);
-    changelogButton->setStyleSheet("background-color:gray;");
+    changelogButton->setStyleSheet("padding-bottom: 2px; color: white;font-weight: bold; font-size: 120%; text-transform: uppercase;background-color:#727272;height:50px;");
     changelogButton->setText("Changelog");
     changelogButton->show();
 
@@ -716,7 +716,7 @@ void UrTUpdater::openSettings(){
 
     Settings *settings = new Settings(this);
 
-    connect(settings, SIGNAL(settingsUpdated(int,int,int)), this, SLOT(setSettings(int,int,int)));
+    connect(settings, SIGNAL(settingsUpdated(int,int,int,QString)), this, SLOT(setSettings(int,int,int,QString)));
 
     settings->currentServer = downloadServer;
     settings->currentVersion = currentVersion;

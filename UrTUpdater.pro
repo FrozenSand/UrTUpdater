@@ -14,17 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         urtupdater.cpp \
-    serverselection.cpp \
-    engineselection.cpp \
-    versionselection.cpp \
     download.cpp \
     settings.cpp
 
 HEADERS  += urtupdater.h \
     common.h \
-    serverselection.h \
-    engineselection.h \
-    versionselection.h \
     download.h \
     settings.h
 

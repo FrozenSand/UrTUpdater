@@ -3,9 +3,6 @@
 
 #include <QMainWindow>
 #include "common.h"
-#include "serverselection.h"
-#include "engineselection.h"
-#include "versionselection.h"
 #include "download.h"
 #include "settings.h"
 

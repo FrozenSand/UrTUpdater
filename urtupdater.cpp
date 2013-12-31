@@ -14,6 +14,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     currentVersion = -1;
     nbFilesToDl = 0;
     nbFilesDled = 0;
+    readyToProcess = false;
     configFileExists = false;
     threadStarted = false;
     updateInProgress = false;
@@ -501,7 +502,13 @@ void UrTUpdater::parseManifest(QString data){
         startDlThread();
     }
 
-    downloadFiles();
+    if(readyToProcess){
+        downloadFiles();
+    }
+    else {
+        readyToProcess = true;
+        getManifest("versionFiles");
+    }
 
     delete dom;
 }
@@ -598,7 +605,7 @@ void UrTUpdater::fileDownloaded(){
         nbFilesToDl = 0;
         nbFilesDled = 0;
 
-        getManifest("versionInfo");
+        getManifest("versionFiles");
     }
 }
 
@@ -758,7 +765,7 @@ void UrTUpdater::setSettings(int version, int engine, int server, int updateType
     downloadServer = server;
     askBeforeUpdating = updateType;
     saveLocalConfig();
-    getManifest("versionInfo");
+    getManifest("versionFiles");
 }
 
 void UrTUpdater::launchGame(){

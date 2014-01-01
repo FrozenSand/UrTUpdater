@@ -300,21 +300,7 @@ void UrTUpdater::parseManifest(QString data){
 
             while(!updater.isNull()){
 
-                if(updater.toElement().nodeName() == "VersionInfo"){
-                    QDomNode versionInfo = updater.firstChild();
-
-                    while(!versionInfo.isNull()){
-                        if(versionInfo.nodeName() == "VersionNumber"){
-                            versionNumber = versionInfo.toElement().text();
-                        }
-                        if(versionInfo.nodeName() == "ReleaseDate"){
-                            releaseDate = versionInfo.toElement().text();
-                        }
-                        versionInfo = versionInfo.nextSibling();
-                    }
-                }
-
-                else if(updater.toElement().nodeName() == "NewsList"){
+                if(updater.toElement().nodeName() == "NewsList"){
                     QDomNode newsListNode = updater.firstChild();
 
                     while(!newsListNode.isNull()){

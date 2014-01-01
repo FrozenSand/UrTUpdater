@@ -70,8 +70,6 @@ private:
     bool readyToProcess;
 
     QString updaterPath;
-    QString versionNumber;
-    QString releaseDate;
 
     QString updaterVersion;
     QString password;

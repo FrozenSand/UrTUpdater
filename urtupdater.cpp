@@ -266,6 +266,9 @@ void UrTUpdater::getManifest(QString query){
     url.addQueryItem("platform", getPlatform());
     url.addQueryItem("query", query);
     url.addQueryItem("password", password);
+    url.addQueryItem("version", QString(currentVersion));
+    url.addQueryItem("engine", QString(gameEngine));
+    url.addQueryItem("server", QString(downloadServer));
 
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));

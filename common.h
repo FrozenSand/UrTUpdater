@@ -36,6 +36,7 @@ typedef struct {
     QString fileMd5;
     QString filePath;
     QString fileSize;
+    QString fileUrl;
 } fileInfo_s;
 
 typedef struct {

@@ -47,7 +47,7 @@ public slots:
     void setSettings(int, int, int, int);
     void drawNews();
 
-    void bytesDownloaded(qint64, qint64, QString, int);
+    void bytesDownloaded(qint64, QString, int);
     void downloadFiles();
     void fileDownloaded();
 
@@ -61,7 +61,7 @@ public slots:
     void launchGame();
 
 signals:
-    void dlFile(QString, QString, int);
+    void dlFile(QString, QString, int, QString);
 
 private:
     Ui::UrTUpdater *ui;

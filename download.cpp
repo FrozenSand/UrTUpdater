@@ -1,7 +1,7 @@
 #include "download.h"
 
 Download::Download(QString server, QString _updaterPath, QString _platform) :
-    downloadServer(server), updaterPath(_updaterPath), platform(_platform){
+    downloadServer(server), updaterPath(_updaterPath), platform(_platform), errorDl(false){
 }
 
 Download::~Download(){
@@ -27,22 +27,27 @@ void Download::reconnect(){
     http = new QNetworkAccessManager(this);
     connect(timeout, SIGNAL(timeout()), this, SLOT(reconnect()));
 
-    emit downloadFile(currentFolder, currentFile, fileSize);
+    emit downloadFile(currentFolder, currentFile, fileSize, fileUrl);
 }
 
 void Download::setDownloadServer(QString server){
     downloadServer = server;
 }
 
-void Download::downloadFile(QString folder, QString file, int size){
+void Download::downloadFile(QString folder, QString file, int size, QString url){
+
+    if(errorDl){
+        return;
+    }
 
     currentDownload = new QFile(updaterPath + folder + file);
     fileSize = size;
     downloadedBytes = 0;
     currentFile = file;
     currentFolder = folder;
+    fileUrl = url;
 
-    request = QNetworkRequest(QString(downloadServer + folder + file));
+    request = QNetworkRequest(QString(url));
 
     // Check if we have to create the folder
     if(!currentFolder.isEmpty() && !QDir().exists(updaterPath + currentFolder)){
@@ -76,17 +81,14 @@ void Download::downloadFile(QString folder, QString file, int size){
 void Download::filePart(){
     QString unit;
     qint64 speed;
-    qint64 percentage;
 
     int count = currentDownload->write(reply->readAll());
     downloadedBytes += count;
 
     if (downloadedBytes == 0){
-        emit bytesDownloaded(0, 0, "b/s", 0);
+        emit bytesDownloaded(0, "b/s", 0);
         return;
     }
-
-    percentage = ((downloadedBytes * 100) / fileSize);
 
     speed = downloadedBytes * 1000.0 / downloadTime.elapsed();
 
@@ -100,7 +102,7 @@ void Download::filePart(){
         unit = "Mb/s";
     }
 
-    emit bytesDownloaded(percentage, speed, unit, downloadedBytes);
+    emit bytesDownloaded(speed, unit, downloadedBytes);
 }
 
 void Download::downloadFinished(){
@@ -110,6 +112,7 @@ void Download::downloadFinished(){
 
     if(downloadInProgress){
         downloadInProgress = false;
+
         currentDownload->close();
 
         // Apply chmod +x for executable files on linux
@@ -139,5 +142,6 @@ void Download::downloadFinished(){
 }
 
 void Download::downloadError(QNetworkReply::NetworkError code){
+    errorDl = true;
     emit dlError(code);
 }

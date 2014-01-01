@@ -427,6 +427,7 @@ void UrTUpdater::parseManifest(QString data){
                             QString fileName;
                             QString fileMd5;
                             QString fileSize;
+                            QString fileUrl;
                             bool mustDownload = false;
 
                             while(!fileInfo.isNull()){
@@ -441,6 +442,9 @@ void UrTUpdater::parseManifest(QString data){
                                 }
                                 if(fileInfo.nodeName() == "FileSize"){
                                     fileSize = fileInfo.toElement().text();
+                                }
+                                if(fileInfo.nodeName() == "FileUrl"){
+                                    fileUrl = fileInfo.toElement().text();
                                 }
                                 fileInfo = fileInfo.nextSibling();
                             }
@@ -472,6 +476,7 @@ void UrTUpdater::parseManifest(QString data){
                                 fi.filePath = fileDir;
                                 fi.fileMd5 = fileMd5;
                                 fi.fileSize = fileSize;
+                                fi.fileUrl = fileUrl;
                                 filesToDownload.append(fi);
                             }
 
@@ -521,9 +526,9 @@ void UrTUpdater::startDlThread(){
     connect(dl, SIGNAL(dlError(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
     connect(dl, SIGNAL(folderError(QString)), this, SLOT(folderError(QString)));
     connect(dl, SIGNAL(fileDownloaded()), this, SLOT(fileDownloaded()));
-    connect(dl, SIGNAL(bytesDownloaded(qint64, qint64, QString, int)), this, SLOT(bytesDownloaded(qint64, qint64, QString, int)));
+    connect(dl, SIGNAL(bytesDownloaded(qint64, QString, int)), this, SLOT(bytesDownloaded(qint64, QString, int)));
 
-    connect(this, SIGNAL(dlFile(QString,QString, int)), dl, SLOT(downloadFile(QString, QString, int)));
+    connect(this, SIGNAL(dlFile(QString,QString, int, QString)), dl, SLOT(downloadFile(QString, QString, int, QString)));
 
     threadStarted = true;
     dlThread->start();
@@ -532,6 +537,7 @@ void UrTUpdater::startDlThread(){
 void UrTUpdater::downloadFiles(){
 
     if(filesToDownload.size() <= 0){
+        dlBar->setRange(0, 100);
         dlBar->setValue(100);
         dlSpeed->hide();
         dlSize->hide();
@@ -568,22 +574,23 @@ void UrTUpdater::downloadFiles(){
         nbFilesDled = 0;
         currentFile = filesToDownload.takeFirst();
         dlBar->setValue(0);
+        dlBar->setRange(0, currentFile.fileSize.toInt());
         dlSpeed->show();
         dlSize->show();
         loaderAnim->start();
         playAnim->stop();
         playButton->setText("Updating...");
 
-        emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt());
+        emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt(), currentFile.fileUrl);
     }
 }
 
-void UrTUpdater::bytesDownloaded(qint64 percentage, qint64 speed, QString unit, int nbBytes){
+void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes){
     QString nb;
     QString nb2;
     int totalFileSize = currentFile.fileSize.toInt();
 
-    dlBar->setValue(percentage);
+    dlBar->setValue(nbBytes);
     dlText->setText("Downloading: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
     dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
 
@@ -599,7 +606,7 @@ void UrTUpdater::fileDownloaded(){
         currentFile = filesToDownload.takeFirst();
         dlBar->setValue(0);
 
-        emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt());
+        emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt(), currentFile.fileUrl);
     }
 
     else {
@@ -724,6 +731,7 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
 
         case QNetworkReply::ContentNotFoundError:
             error = "Error: the remote content could not be found. Please report this issue on our website: http://www.urbanterror.info";
+            critical = true;
             break;
 
         case QNetworkReply::UnknownNetworkError:
@@ -742,10 +750,16 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
     if(!error.isEmpty()){
         if(critical == true){
             QMessageBox::critical(0, "Download error", error);
+            dlThread->terminate();
             quit();
         }
         else {
             QMessageBox::information(0, "Download error", error);
+            if(threadStarted){
+                if(dl->errorDl){
+                    dl->errorDl = false;
+                }
+            }
         }
     }
 }

@@ -11,19 +11,20 @@ public:
     Download(QString, QString, QString);
     ~Download();
     void setDownloadServer(QString);
+    bool errorDl;
 
 public slots:
     void init();
     void filePart();
     void downloadError(QNetworkReply::NetworkError);
-    void downloadFile(QString, QString, int);
+    void downloadFile(QString, QString, int, QString);
     void downloadFinished();
     void reconnect();
 
 signals:
     void dlError(QNetworkReply::NetworkError);
     void folderError(QString);
-    void bytesDownloaded(qint64, qint64, QString, int);
+    void bytesDownloaded(qint64, QString, int);
     void fileDownloaded();
 
 private:
@@ -38,6 +39,7 @@ private:
     int fileSize;
     bool downloadInProgress;
 
+    QString fileUrl;
     QString currentFile;
     QString currentFolder;
     QFile* currentDownload;

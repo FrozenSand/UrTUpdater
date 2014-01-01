@@ -1,5 +1,3 @@
-// menu "mise à jour auto ou manuelle"
-
 #include "urtupdater.h"
 #include "ui_urtupdater.h"
 

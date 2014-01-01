@@ -34,6 +34,7 @@ public slots:
     QString getServerUrlById(int);
     QString getEngineLaunchStringById(int id);
     QString getMd5Sum(QFile* file);
+    QString getSize(int *bytes);
 
     void parseLocalConfig();
     void saveLocalConfig();
@@ -46,7 +47,7 @@ public slots:
     void setSettings(int, int, int, int);
     void drawNews();
 
-    void bytesDownloaded(qint64, qint64, QString);
+    void bytesDownloaded(qint64, qint64, QString, int);
     void downloadFiles();
     void fileDownloaded();
 
@@ -55,6 +56,7 @@ public slots:
 
     void folderError(QString);
     void networkError(QNetworkReply::NetworkError);
+    void apiError();
 
     void launchGame();
 
@@ -65,6 +67,7 @@ private:
     Ui::UrTUpdater *ui;
 
     bool updateInProgress;
+    bool readyToProcess;
 
     QString updaterPath;
     QString versionNumber;
@@ -89,6 +92,7 @@ private:
     QProgressBar* dlBar;
     QLabel* dlText;
     QLabel* dlSpeed;
+    QLabel* dlSize;
 
     QPushButton* playButton;
     QPushButton* changelogButton;

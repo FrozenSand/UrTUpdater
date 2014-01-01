@@ -59,8 +59,14 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     dlSpeed = new QLabel(this);
     dlSpeed->move(150, 305);
     dlSpeed->setStyleSheet("color:white;");
-    dlSpeed->setMinimumWidth(400);
+    dlSpeed->setMinimumWidth(200);
     dlSpeed->hide();
+
+    dlSize = new QLabel(this);
+    dlSize->move(470, 305);
+    dlSize->setStyleSheet("color:white;");
+    dlSize->setMinimumWidth(150);
+    dlSize->hide();
 
     dlBar = new QProgressBar(this);
     dlBar->move(150, 290);
@@ -528,7 +534,7 @@ void UrTUpdater::startDlThread(){
     connect(dl, SIGNAL(dlError(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
     connect(dl, SIGNAL(folderError(QString)), this, SLOT(folderError(QString)));
     connect(dl, SIGNAL(fileDownloaded()), this, SLOT(fileDownloaded()));
-    connect(dl, SIGNAL(bytesDownloaded(qint64, qint64, QString)), this, SLOT(bytesDownloaded(qint64, qint64, QString)));
+    connect(dl, SIGNAL(bytesDownloaded(qint64, qint64, QString, int)), this, SLOT(bytesDownloaded(qint64, qint64, QString, int)));
 
     connect(this, SIGNAL(dlFile(QString,QString, int)), dl, SLOT(downloadFile(QString, QString, int)));
 
@@ -541,6 +547,7 @@ void UrTUpdater::downloadFiles(){
     if(filesToDownload.size() <= 0){
         dlBar->setValue(100);
         dlSpeed->hide();
+        dlSize->hide();
         updateInProgress = false;
         playButton->setDisabled(false);
         loaderAnim->stop();
@@ -575,6 +582,7 @@ void UrTUpdater::downloadFiles(){
         currentFile = filesToDownload.takeFirst();
         dlBar->setValue(0);
         dlSpeed->show();
+        dlSize->show();
         loaderAnim->start();
         playAnim->stop();
         playButton->setText("Updating...");
@@ -583,10 +591,19 @@ void UrTUpdater::downloadFiles(){
     }
 }
 
-void UrTUpdater::bytesDownloaded(qint64 percentage, qint64 speed, QString unit){
+void UrTUpdater::bytesDownloaded(qint64 percentage, qint64 speed, QString unit, int nbBytes){
+    QString nb;
+    QString nb2;
+    int totalFileSize = currentFile.fileSize.toInt();
+
     dlBar->setValue(percentage);
     dlText->setText("Downloading: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
     dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
+
+    nb = getSize(&nbBytes);
+    nb2 = getSize(&totalFileSize);
+
+    dlSize->setText(QString::number(nbBytes) + nb + "/ " + QString::number(totalFileSize) + nb2); // / " + QString::number(currentFile.fileSize)/1000 + " kB"
 }
 
 void UrTUpdater::fileDownloaded(){
@@ -736,6 +753,11 @@ void UrTUpdater::folderError(QString folder){
     quit();
 }
 
+void UrTUpdater::apiError(){
+    QMessageBox::critical(this, "API error", "The information from the API are missing or wrong. Please report it on www.urbanterror.info and try again later.");
+    quit();
+}
+
 void UrTUpdater::openSettings(){
     if(updateInProgress){
         QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
@@ -828,6 +850,22 @@ QString UrTUpdater::getEngineLaunchStringById(int id){
     }
 
     return "";
+}
+
+QString UrTUpdater::getSize(int *bytes){
+    QString nb;
+
+    if (*bytes < 1024) {
+        nb = " b ";
+    } else if (*bytes < 1024*1024) {
+        *bytes /= 1024;
+        nb = " kb ";
+    } else {
+        *bytes /= 1024*1024;
+        nb = " Mb ";
+    }
+
+    return nb;
 }
 
 void UrTUpdater::quit(){

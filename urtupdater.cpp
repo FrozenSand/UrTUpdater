@@ -633,6 +633,10 @@ void UrTUpdater::checkDownloadServer(){
     QList<serverInfo_s>::iterator li;
     bool found = false;
 
+    if(downloadServers.size() < 1){
+        apiError();
+    }
+
     // Check if the download server that is stored in the config file still exists
     for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
         if(li->serverId == downloadServer){
@@ -649,6 +653,10 @@ void UrTUpdater::checkDownloadServer(){
 void UrTUpdater::checkGameEngine(){
     QList<engineInfo_s>::iterator li;
     bool found = false;
+
+    if(enginesList.size() < 1){
+        apiError();
+    }
 
     // Check if the engine that is stored in the config file still exists
     for(li = enginesList.begin(); li != enginesList.end(); ++li){
@@ -667,6 +675,10 @@ void UrTUpdater::checkVersion(){
     QList<versionInfo_s>::iterator li;
     bool found = false;
 
+    if(versionsList.size() < 1){
+        apiError();
+    }
+
     // Check if the version that is stored in the config file still exists
     for(li = versionsList.begin(); li != versionsList.end(); ++li){
         if(li->versionId == currentVersion){
@@ -683,6 +695,10 @@ void UrTUpdater::checkVersion(){
 void UrTUpdater::drawNews(){
     QList<QString>::iterator li;
     int i = 0;
+
+    if(newsList.size() < 1){
+        apiError();
+    }
 
     for(li = newsList.begin(); li != newsList.end(); ++li, i++){
         QLabel* news = new QLabel(this);

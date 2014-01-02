@@ -30,3 +30,6 @@ RESOURCES += \
 static {
     DEFINES += STATIC
 }
+
+RC_FILE = urtupdater.rc
+ICON = images/urtupdater.icns

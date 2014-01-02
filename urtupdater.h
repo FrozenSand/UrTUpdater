@@ -68,6 +68,7 @@ private:
 
     bool updateInProgress;
     bool readyToProcess;
+    bool firstLaunch;
 
     QString updaterPath;
 

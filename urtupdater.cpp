@@ -16,6 +16,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     configFileExists = false;
     threadStarted = false;
     updateInProgress = false;
+    firstLaunch = false;
 
     QStringList arguments = QCoreApplication::arguments();
     if(arguments.count() >= 1) {
@@ -130,6 +131,8 @@ void UrTUpdater::init(){
                 folderError(QString(updaterPath + URT_GAME_SUBDIR));
             }
         }
+
+        firstLaunch = true;
     }
 
     parseLocalConfig();
@@ -504,6 +507,11 @@ void UrTUpdater::parseManifest(QString data){
         downloadFiles();
     }
     else {
+        if(firstLaunch){
+            firstLaunch = false;
+            openSettings();
+            return;
+        }
         readyToProcess = true;
         getManifest("versionFiles");
     }

@@ -88,7 +88,7 @@ void Settings::init(){
 
     for(liServer = downloadServers.begin(); liServer != downloadServers.end(); ++liServer){
         if(liServer->serverLocation != ""){
-            serverList->addItem(QIcon(QString(":/flags/%1.png").arg(liServer->serverLocation)), liServer->serverName);
+            serverList->addItem(QIcon(QString(":/images/flags/%1.png").arg(liServer->serverLocation)), liServer->serverName);
         }
         else {
             serverList->addItem(liServer->serverName);

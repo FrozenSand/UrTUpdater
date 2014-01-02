@@ -38,7 +38,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     //connect(actionChangelog, SIGNAL(triggered()), this, SLOT(openChangelogPage()));
 
     QAction *actionAbout = menuHelp->addAction("&About");
-    //connect(actionAbout, SIGNAL(triggered()), this, SLOT(openAboutPage()));
+    connect(actionAbout, SIGNAL(triggered()), this, SLOT(openAboutPage()));
 
     QAction *actionHelp = menuHelp->addAction("&Get help");
     connect(actionHelp, SIGNAL(triggered()), this, SLOT(openHelpPage()));
@@ -789,6 +789,15 @@ void UrTUpdater::openHelpPage(){
                              "- the support forums: http://www.urbanterror.info/forums/\n" \
                              "- irc: #urbanterror @ irc.quakenet.org\n" \
                              "- email: contact@urbanterror.info");
+}
+
+void UrTUpdater::openAboutPage(){
+    QMessageBox::information(this, "About UrTUpdater", "Urban Terror Updater\n" \
+                             "Version " + updaterVersion + "\n" \
+                             "Author: Charles 'Barbatos' Duprey\n\n" \
+                             "Copyright: FrozenSand / 0870760 B.C. Ltd. All rights reserved.\n" \
+                             "This Updater is under the LGPL v2.1 licence.\n\n" \
+                             "Source code: https://github.com/Barbatos/UrTUpdater/");
 }
 
 void UrTUpdater::openSettings(){

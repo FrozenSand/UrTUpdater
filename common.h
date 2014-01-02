@@ -48,6 +48,7 @@
 #include <QTimer>
 #include <QProcess>
 #include <QMovie>
+#include <QTextEdit>
 
 #define URT_GAME_NAME       "Urban Terror"
 #define URT_GAME_SUBDIR     "q3ut4"

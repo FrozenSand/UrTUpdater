@@ -69,6 +69,7 @@ public slots:
     void openSettings();
     void openHelpPage();
     void openAboutPage();
+    void openChangelogPage();
 
     void setSettings(int, int, int, int);
     void drawNews();
@@ -97,7 +98,7 @@ private:
     bool firstLaunch;
 
     QString updaterPath;
-
+    QString changelog;
     QString updaterVersion;
     QString password;
 

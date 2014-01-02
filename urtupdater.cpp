@@ -1,3 +1,5 @@
+// licence !
+
 /**
   * Urban Terror Updater
   *
@@ -29,6 +31,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     ui->setupUi(this);
 
     updaterVersion = "4.0.1";
+    changelog = "Empty.";
     password = "";
     downloadServer = -1;
     gameEngine = -1;
@@ -58,7 +61,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     connect(actionSettings, SIGNAL(triggered()), this, SLOT(openSettings()));
 
     QAction *actionChangelog = menuFile->addAction("&Changelog");
-    //connect(actionChangelog, SIGNAL(triggered()), this, SLOT(openChangelogPage()));
+    connect(actionChangelog, SIGNAL(triggered()), this, SLOT(openChangelogPage()));
 
     QAction *actionAbout = menuHelp->addAction("&About");
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(openAboutPage()));
@@ -122,7 +125,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     playAnim->start();
 
     connect(playButton, SIGNAL(clicked()), this, SLOT(launchGame()));
-
+    connect(changelogButton, SIGNAL(clicked()), this, SLOT(openChangelogPage()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
 
     init();
@@ -325,6 +328,10 @@ void UrTUpdater::parseManifest(QString data){
             QDomNode updater = node.firstChild();
 
             while(!updater.isNull()){
+
+                if(updater.toElement().nodeName() == "Changelog"){
+                    changelog = updater.toElement().text();
+                }
 
                 if(updater.toElement().nodeName() == "NewsList"){
                     QDomNode newsListNode = updater.firstChild();
@@ -821,6 +828,22 @@ void UrTUpdater::openAboutPage(){
                              "Copyright: FrozenSand / 0870760 B.C. Ltd. All rights reserved.\n" \
                              "This Updater is under the LGPL v2.1 licence.\n\n" \
                              "Source code: https://github.com/Barbatos/UrTUpdater/");
+}
+
+void UrTUpdater::openChangelogPage(){
+    QDialog *dialog = new QDialog(this);
+    dialog->setFixedWidth(600);
+    dialog->setFixedHeight(500);
+    dialog->show();
+
+    QTextEdit* txt = new QTextEdit(this);
+    txt->setDocumentTitle("Urban Terror Changelog");
+    txt->setText(changelog);
+    txt->setFixedWidth(600);
+    txt->setFixedHeight(500);
+    txt->setParent(dialog);
+    txt->setReadOnly(true);
+    txt->show();
 }
 
 void UrTUpdater::openSettings(){

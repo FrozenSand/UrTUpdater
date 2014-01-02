@@ -77,7 +77,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     dlText = new QLabel(this);
     dlText->move(150, 262);
     dlText->setStyleSheet("color:white;");
-    dlText->setMinimumWidth(400);
+    dlText->setMinimumWidth(450);
     dlText->setText("Getting information from the API...");
     dlText->show();
 
@@ -451,8 +451,6 @@ void UrTUpdater::parseManifest(QString data){
                 else if(updater.toElement().nodeName() == "Files"){
                     QDomNode files = updater.firstChild();
 
-                    dlText->setText("Checking the game files checksums...");
-
                     while(!files.isNull()){
                         if(files.nodeName() == "File"){
                             QDomNode fileInfo = files.firstChild();
@@ -543,6 +541,7 @@ void UrTUpdater::parseManifest(QString data){
             return;
         }
         readyToProcess = true;
+        dlText->setText("Checking the game files checksums. It may take a few minutes...");
         getManifest("versionFiles");
     }
 

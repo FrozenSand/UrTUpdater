@@ -69,7 +69,6 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     dlBar = new QProgressBar(this);
     dlBar->move(150, 290);
     dlBar->setMinimumWidth(450);
-    dlBar->setRange(0, 100);
     dlBar->show();
 
     playButton = new QPushButton(this);
@@ -605,6 +604,7 @@ void UrTUpdater::fileDownloaded(){
     if(filesToDownload.size() > 0){
         nbFilesDled++;
         currentFile = filesToDownload.takeFirst();
+        dlBar->setRange(0, currentFile.fileSize.toInt());
         dlBar->setValue(0);
 
         emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt(), currentFile.fileUrl);

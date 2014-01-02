@@ -44,6 +44,8 @@ public slots:
     void checkVersion();
 
     void openSettings();
+    void openHelpPage();
+
     void setSettings(int, int, int, int);
     void drawNews();
 

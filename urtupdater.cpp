@@ -41,7 +41,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     //connect(actionAbout, SIGNAL(triggered()), this, SLOT(openAboutPage()));
 
     QAction *actionHelp = menuHelp->addAction("&Get help");
-    //connect(actionHelp, SIGNAL(triggered()), this, SLOT(openHelpPage()));
+    connect(actionHelp, SIGNAL(triggered()), this, SLOT(openHelpPage()));
     actionHelp->setShortcut(QKeySequence("Ctrl+H"));
 
     QAction *actionQuitter = menuFile->addAction("&Quit");
@@ -782,6 +782,13 @@ void UrTUpdater::folderError(QString folder){
 void UrTUpdater::apiError(){
     QMessageBox::critical(this, "API error", "The information from the API are missing or wrong. Please report it on www.urbanterror.info and try again later.");
     quit();
+}
+
+void UrTUpdater::openHelpPage(){
+    QMessageBox::information(this, "Get help", "If you're experiencing issues with this updater, please contact us through:\n" \
+                             "- the support forums: http://www.urbanterror.info/forums/\n" \
+                             "- irc: #urbanterror @ irc.quakenet.org\n" \
+                             "- email: contact@urbanterror.info");
 }
 
 void UrTUpdater::openSettings(){

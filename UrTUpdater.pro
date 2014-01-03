@@ -21,7 +21,7 @@
 # @copyright  2013/2014 Frozen Sand / 0870760 B.C. Ltd
 #
 
-QT       += core gui network widgets xml
+QT       += core gui network widgets xml concurrent
 
 CONFIG   += x86 static
 

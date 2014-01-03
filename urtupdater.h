@@ -46,6 +46,7 @@ public slots:
     void quit();
     void init();
     void startDlThread();
+    void work();
 
     QString getPlatform();
     QString getCurrentPath();

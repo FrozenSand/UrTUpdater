@@ -297,7 +297,10 @@ void UrTUpdater::parseAPIAnswer(){
     QByteArray  apiByteAnswer = apiAnswer->readAll();
     QString     apiData = QString(apiByteAnswer);
 
-    parseManifest(apiData);
+    QFutureWatcher<void>* watcher = new QFutureWatcher<void>();
+    connect(watcher, SIGNAL(finished()), this, SLOT(work()));
+    QFuture<void> parser = QtConcurrent::run(this, &UrTUpdater::parseManifest, apiData);
+    watcher->setFuture(parser);
 }
 
 void UrTUpdater::parseManifest(QString data){
@@ -310,9 +313,9 @@ void UrTUpdater::parseManifest(QString data){
     versionsList.clear();
     newsList.clear();
 
-    dlText->setText("Parsing the answer of the API...");
-
     QDomNode node = dom->firstChild();
+
+    dlText->setText("Parsing the answer of the API...");
 
     while(!node.isNull()){
         if(node.toElement().nodeName() == "Updater"){
@@ -446,6 +449,8 @@ void UrTUpdater::parseManifest(QString data){
                 else if(updater.toElement().nodeName() == "Files"){
                     QDomNode files = updater.firstChild();
 
+                    dlText->setText("Checking the game files checksums. It may take a few minutes...");
+
                     while(!files.isNull()){
                         if(files.nodeName() == "File"){
                             QDomNode fileInfo = files.firstChild();
@@ -517,6 +522,10 @@ void UrTUpdater::parseManifest(QString data){
         node = node.nextSibling();
     }
 
+    delete dom;
+}
+
+void UrTUpdater::work(){
     checkDownloadServer();
     checkGameEngine();
     checkVersion();
@@ -544,11 +553,8 @@ void UrTUpdater::parseManifest(QString data){
             return;
         }
         readyToProcess = true;
-        dlText->setText("Checking the game files checksums. It may take a few minutes...");
         getManifest("versionFiles");
     }
-
-    delete dom;
 }
 
 void UrTUpdater::startDlThread(){

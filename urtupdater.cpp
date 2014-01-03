@@ -100,21 +100,22 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 
     dlBar = new QProgressBar(this);
     dlBar->move(150, 250);
-    dlBar->setMinimumWidth(450);
+    dlBar->setFixedWidth(485);
+    dlBar->setFixedHeight(20);
     dlBar->show();
 
     globalDlBar = new QProgressBar(this);
     globalDlBar->move(150, 301);
-    globalDlBar->setMinimumWidth(450);
+    globalDlBar->setFixedWidth(485);
+    globalDlBar->setFixedHeight(20);
     globalDlBar->hide();
 
     playButton = new QPushButton(this);
     playButton->move(400, 385);
     playButton->setMinimumWidth(200);
     playButton->setMinimumHeight(50);
-    playButton->setText("Play!");
+    playButton->setText("Updating...");
     playButton->setStyleSheet("padding-bottom: 2px; color: white;font-weight: bold; font-size: 120%; text-transform: uppercase;background-color:#727272;height:50px;");
-    playButton->setDisabled(true);
     playButton->setIconSize(QSize(40, 40));
     playButton->show();
 
@@ -132,7 +133,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     playAnim = new QMovie(":/images/urt_play.gif");
     connect(playAnim, SIGNAL(frameChanged(int)), this, SLOT(setPlayIcon(int)));
 
-    playAnim->start();
+    loaderAnim->start();
 
     connect(playButton, SIGNAL(clicked()), this, SLOT(launchGame()));
     connect(changelogButton, SIGNAL(clicked()), this, SLOT(openChangelogPage()));
@@ -607,7 +608,6 @@ void UrTUpdater::downloadFiles(){
         dlSpeed->hide();
         dlSize->hide();
         updateInProgress = false;
-        playButton->setDisabled(false);
         loaderAnim->stop();
         playAnim->start();
         playButton->setText("Play!");
@@ -628,7 +628,6 @@ void UrTUpdater::downloadFiles(){
             result = msg.exec();
 
             if(result == QMessageBox::Cancel){
-                playButton->setDisabled(false);
                 dlText->setText("Your game is outdated!");
                 return;
             }
@@ -648,9 +647,6 @@ void UrTUpdater::downloadFiles(){
         globalDlText->show();
         dlSpeed->show();
         dlSize->show();
-        loaderAnim->start();
-        playAnim->stop();
-        playButton->setText("Updating...");
 
         emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt(), currentFile.fileUrl);
     }
@@ -778,7 +774,12 @@ void UrTUpdater::drawNews(){
     for(li = newsList.begin(); li != newsList.end(); ++li, i++){
         QLabel* news = new QLabel(this);
 
-        news->move(150, 65 + (i*26));
+        if(!menuBar()->isNativeMenuBar()){
+            news->move(150, 85 + (i*26));
+        }
+        else {
+            news->move(150, 65 + (i*26));
+        }
         news->setMinimumWidth(450);
         news->setText(*li);
         news->setOpenExternalLinks(true);
@@ -958,6 +959,10 @@ void UrTUpdater::launchGame(){
     QString launchString = getEngineLaunchStringById(gameEngine);
     QString platform = getPlatform();
     QString s;
+
+    if(updateInProgress){
+        return;
+    }
 
     if(platform == "Mac"){
         s = "open " + updaterPath + launchString;

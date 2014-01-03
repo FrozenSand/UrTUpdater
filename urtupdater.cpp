@@ -151,13 +151,6 @@ void UrTUpdater::init(){
             quit();
         }
 
-        // Create the game folder
-        else {
-            if(!QDir().mkdir(updaterPath + URT_GAME_SUBDIR)){
-                folderError(QString(updaterPath + URT_GAME_SUBDIR));
-            }
-        }
-
         firstLaunch = true;
     }
 
@@ -540,7 +533,15 @@ void UrTUpdater::parseManifest(QString data){
     }
     else {
         if(firstLaunch){
+            openLicencePage();
+
+            // Create the game folder
+            if(!QDir().mkdir(updaterPath + URT_GAME_SUBDIR)){
+                folderError(QString(updaterPath + URT_GAME_SUBDIR));
+            }
+
             firstLaunch = false;
+
             openSettings();
             return;
         }

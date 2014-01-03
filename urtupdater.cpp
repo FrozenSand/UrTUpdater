@@ -34,6 +34,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     downloadServer = -1;
     gameEngine = -1;
     currentVersion = -1;
+    askBeforeUpdating = -1;
     nbFilesToDl = 0;
     nbFilesDled = 0;
     readyToProcess = false;
@@ -450,7 +451,7 @@ void UrTUpdater::parseManifest(QString data){
                                 if(versionNode.nodeName() == "VersionName"){
                                     versionName = versionNode.toElement().text();
                                 }
-                                if(versionNode.nodeName() == "VersionId"){
+                                if(versionNode.nodeName() == "VersionNumber"){
                                     versionId = versionNode.toElement().text().toInt();
                                 }
                                 versionNode = versionNode.nextSibling();
@@ -618,7 +619,7 @@ void UrTUpdater::downloadFiles(){
 
     if(filesToDownload.size() > 0){
 
-        if(askBeforeUpdating){
+        if(askBeforeUpdating == 1){
             QMessageBox msg;
             int result;
 
@@ -629,6 +630,9 @@ void UrTUpdater::downloadFiles(){
 
             if(result == QMessageBox::Cancel){
                 dlText->setText("Your game is outdated!");
+                loaderAnim->stop();
+                playAnim->start();
+                playButton->setText("Play!");
                 return;
             }
         }

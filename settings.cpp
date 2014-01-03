@@ -126,8 +126,11 @@ void Settings::init(){
     updateBehaviorList->addItem(QString("Automatic (default)"));
     updateBehaviorList->addItem(QString("Ask me"));
 
-    if(currentUpdateBehavior){
+    if(currentUpdateBehavior != -1){
         updateBehaviorList->setCurrentIndex(currentUpdateBehavior);
+    }
+    else {
+        updateBehaviorList->setCurrentIndex(0);
     }
 
     updateBehaviorList->move(284, 110);

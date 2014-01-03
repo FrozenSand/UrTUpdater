@@ -59,6 +59,7 @@ public slots:
     QString getEngineLaunchStringById(int id);
     QString getMd5Sum(QFile* file);
     QString getSize(int *bytes);
+    int getTotalSizeToDl();
 
     void parseLocalConfig();
     void saveLocalConfig();
@@ -76,7 +77,7 @@ public slots:
     void setSettings(int, int, int, int);
     void drawNews();
 
-    void bytesDownloaded(qint64, QString, int);
+    void bytesDownloaded(qint64, QString, int, int);
     void downloadFiles();
     void fileDownloaded();
 
@@ -118,7 +119,10 @@ private:
     int nbFilesToDl;
     int nbFilesDled;
     int downloadedBytes;
+    int totalSizeToDl;
+
     QProgressBar* dlBar;
+    QProgressBar* globalDlBar;
     QLabel* dlText;
     QLabel* dlSpeed;
     QLabel* dlSize;

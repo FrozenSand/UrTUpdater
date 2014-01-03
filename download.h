@@ -47,7 +47,7 @@ public slots:
 signals:
     void dlError(QNetworkReply::NetworkError);
     void folderError(QString);
-    void bytesDownloaded(qint64, QString, int);
+    void bytesDownloaded(qint64, QString, int, int);
     void fileDownloaded();
 
 private:

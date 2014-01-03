@@ -109,7 +109,7 @@ void Download::filePart(){
     downloadedBytes += count;
 
     if (downloadedBytes == 0){
-        emit bytesDownloaded(0, "b/s", 0);
+        emit bytesDownloaded(0, "b/s", 0, 0);
         return;
     }
 
@@ -125,7 +125,7 @@ void Download::filePart(){
         unit = "Mb/s";
     }
 
-    emit bytesDownloaded(speed, unit, downloadedBytes);
+    emit bytesDownloaded(speed, unit, downloadedBytes, count);
 }
 
 void Download::downloadFinished(){

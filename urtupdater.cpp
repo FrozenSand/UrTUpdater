@@ -1,5 +1,3 @@
-// licence !
-
 /**
   * Urban Terror Updater
   *

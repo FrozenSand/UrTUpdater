@@ -107,9 +107,17 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 
     globalDlBar = new QProgressBar(this);
     globalDlBar->move(150, 301);
-    globalDlBar->setFixedWidth(485);
     globalDlBar->setFixedHeight(20);
     globalDlBar->hide();
+
+    if(!menuBar()->isNativeMenuBar()){
+        dlBar->setFixedWidth(485);
+        globalDlBar->setFixedWidth(485);
+    }
+    else {
+        dlBar->setFixedWidth(450);
+        globalDlBar->setFixedWidth(450);
+    }
 
     playButton = new QPushButton(this);
     playButton->move(400, 385);

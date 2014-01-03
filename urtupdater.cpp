@@ -991,7 +991,10 @@ QString UrTUpdater::getSize(int *bytes){
 }
 
 void UrTUpdater::quit(){
-    saveLocalConfig();
+    if(!firstLaunch){
+        saveLocalConfig();
+    }
+
     exit(0);
 }
 

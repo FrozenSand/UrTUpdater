@@ -874,6 +874,7 @@ void UrTUpdater::setSettings(int version, int engine, int server, int updateType
     downloadServer = server;
     askBeforeUpdating = updateType;
     saveLocalConfig();
+    dlText->setText("Checking the game files checksums. It may take a few minutes...");
     getManifest("versionFiles");
 }
 

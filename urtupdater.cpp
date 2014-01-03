@@ -73,31 +73,38 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
 
     dlText = new QLabel(this);
-    dlText->move(150, 232);
+    dlText->move(150, 222);
     dlText->setStyleSheet("color:white;");
     dlText->setMinimumWidth(450);
     dlText->setText("Getting information from the API...");
     dlText->show();
 
+    globalDlText = new QLabel(this);
+    globalDlText->move(150, 273);
+    globalDlText->setStyleSheet("color:white;");
+    globalDlText->setMinimumWidth(450);
+    globalDlText->setText("Overall Progress:");
+    globalDlText->hide();
+
     dlSpeed = new QLabel(this);
-    dlSpeed->move(150, 303);
+    dlSpeed->move(150, 318);
     dlSpeed->setStyleSheet("color:white;");
     dlSpeed->setMinimumWidth(200);
     dlSpeed->hide();
 
     dlSize = new QLabel(this);
-    dlSize->move(470, 303);
+    dlSize->move(470, 318);
     dlSize->setStyleSheet("color:white;");
     dlSize->setMinimumWidth(150);
     dlSize->hide();
 
     dlBar = new QProgressBar(this);
-    dlBar->move(150, 260);
+    dlBar->move(150, 250);
     dlBar->setMinimumWidth(450);
     dlBar->show();
 
     globalDlBar = new QProgressBar(this);
-    globalDlBar->move(150, 286);
+    globalDlBar->move(150, 301);
     globalDlBar->setMinimumWidth(450);
     globalDlBar->hide();
 
@@ -145,7 +152,7 @@ void UrTUpdater::init(){
 
         msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msg.setIcon(QMessageBox::Information);
-        msg.setText("The game " URT_GAME_NAME " will be installed in this path:\n" + updaterPath + "\n"
+        msg.setText("The game " URT_GAME_NAME " will be installed in this path:\n\n" + updaterPath + "\n\n"
                     + "To change the installation path, please click on \"Cancel\" and copy this Updater to where you want it to be installed.");
         result = msg.exec();
 
@@ -591,6 +598,7 @@ void UrTUpdater::downloadFiles(){
         dlBar->setRange(0, 100);
         dlBar->setValue(100);
         globalDlBar->hide();
+        globalDlText->hide();
         dlSpeed->hide();
         dlSize->hide();
         updateInProgress = false;
@@ -632,6 +640,7 @@ void UrTUpdater::downloadFiles(){
         globalDlBar->setValue(0);
         globalDlBar->setRange(0, totalSizeToDl);
         globalDlBar->show();
+        globalDlText->show();
         dlSpeed->show();
         dlSize->show();
         loaderAnim->start();
@@ -653,7 +662,7 @@ void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes, int dl
     globalDlBar->setValue(downloadedBytes);
     dlBar->setValue(nbBytes);
 
-    dlText->setText("Downloading: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
+    dlText->setText("Current file: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
     dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
 
     int bytes = downloadedBytes;
@@ -678,6 +687,7 @@ void UrTUpdater::fileDownloaded(){
         dlBar->setRange(0, 100);
         dlBar->setValue(100);
         globalDlBar->hide();
+        globalDlText->hide();
         dlSize->hide();
         dlSpeed->hide();
 

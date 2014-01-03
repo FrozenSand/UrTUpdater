@@ -123,6 +123,7 @@ private:
 
     QProgressBar* dlBar;
     QProgressBar* globalDlBar;
+    QLabel* globalDlText;
     QLabel* dlText;
     QLabel* dlSpeed;
     QLabel* dlSize;

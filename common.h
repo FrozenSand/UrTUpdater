@@ -46,6 +46,7 @@
 #include <QThread>
 #include <QProgressBar>
 #include <QTimer>
+#include <QTime>
 #include <QProcess>
 #include <QMovie>
 #include <QTextEdit>

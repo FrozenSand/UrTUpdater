@@ -24,7 +24,7 @@
 #include "download.h"
 
 Download::Download(QString server, QString _updaterPath, QString _platform) :
-    downloadServer(server), updaterPath(_updaterPath), platform(_platform), errorDl(false){
+    errorDl(false), updaterPath(_updaterPath), downloadServer(server), platform(_platform){
 }
 
 Download::~Download(){

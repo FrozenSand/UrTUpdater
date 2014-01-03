@@ -659,7 +659,6 @@ void UrTUpdater::downloadFiles(){
 void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes, int dled){
     QString nb;
     QString nb2;
-    int totalFileSize = currentFile.fileSize.toInt();
     int totalSize = totalSizeToDl;
 
     downloadedBytes += dled;

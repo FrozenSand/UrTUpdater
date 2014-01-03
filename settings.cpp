@@ -41,32 +41,32 @@ void Settings::init(){
 
     okButton = new QPushButton(this);
     okButton->setText("Ok");
-    okButton->move(377, 310);
+    okButton->move(260, 170);
     okButton->show();
 
     cancelButton = new QPushButton(this);
-    cancelButton->setText("Go back");
-    cancelButton->move(280, 310);
+    cancelButton->setText("Back");
+    cancelButton->move(174, 170);
     cancelButton->show();
 
     versionLabel = new QLabel(this);
-    versionLabel->setText("Select the version that you want to download:");
+    versionLabel->setText("Version:");
     versionLabel->move(30, 20);
     versionLabel->show();
 
-    serverLabel = new QLabel(this);
-    serverLabel->setText("Select a download mirror depending on your location:");
-    serverLabel->move(30, 90);
-    serverLabel->show();
-
     engineLabel = new QLabel(this);
-    engineLabel->setText("Select the game engine that you want to use to run the game:");
-    engineLabel->move(30, 160);
+    engineLabel->setText("Game engine:");
+    engineLabel->move(30, 90);
     engineLabel->show();
 
+    serverLabel = new QLabel(this);
+    serverLabel->setText("Download mirror:");
+    serverLabel->move(285, 20);
+    serverLabel->show();
+
     updateLabel = new QLabel(this);
-    updateLabel->setText("Select how the Updater will behave when there is a new update:");
-    updateLabel->move(30, 230);
+    updateLabel->setText("Update policy:");
+    updateLabel->move(285, 90);
     updateLabel->show();
 
     versionList = new QComboBox(this);
@@ -82,7 +82,24 @@ void Settings::init(){
     }
 
     versionList->move(29, 40);
+    versionList->setMinimumWidth(190);
     versionList->show();
+
+    engineList = new QComboBox(this);
+
+    for(liEngine = enginesList.begin(); liEngine != enginesList.end(); ++liEngine){
+        engineList->addItem(liEngine->engineName);
+    }
+
+    currentEngineName = getEngineNameById(currentEngine);
+
+    if(!currentEngineName.isEmpty()){
+        engineList->setCurrentIndex((int)engineList->findText(currentEngineName));
+    }
+
+    engineList->move(29, 110);
+    engineList->setMinimumWidth(190);
+    engineList->show();
 
     serverList = new QComboBox(this);
 
@@ -101,40 +118,27 @@ void Settings::init(){
         serverList->setCurrentIndex((int)serverList->findText(currentServerName));
     }
 
-    serverList->move(29, 110);
+    serverList->move(284, 40);
+    serverList->setMinimumWidth(190);
     serverList->show();
 
-    engineList = new QComboBox(this);
-
-    for(liEngine = enginesList.begin(); liEngine != enginesList.end(); ++liEngine){
-        engineList->addItem(liEngine->engineName);
-    }
-
-    currentEngineName = getEngineNameById(currentEngine);
-
-    if(!currentEngineName.isEmpty()){
-        engineList->setCurrentIndex((int)engineList->findText(currentEngineName));
-    }
-
-    engineList->move(29, 180);
-    engineList->show();
-
     updateBehaviorList = new QComboBox(this);
-    updateBehaviorList->addItem(QString("Auto-update (default)"));
-    updateBehaviorList->addItem(QString("Ask before updating"));
+    updateBehaviorList->addItem(QString("Automatic (default)"));
+    updateBehaviorList->addItem(QString("Ask me"));
 
     if(currentUpdateBehavior){
         updateBehaviorList->setCurrentIndex(currentUpdateBehavior);
     }
 
-    updateBehaviorList->move(29, 250);
+    updateBehaviorList->move(284, 110);
+    updateBehaviorList->setMinimumWidth(190);
     updateBehaviorList->show();
 
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
 
     setWindowTitle("Settings");
-    setFixedSize(450, 350);
+    setFixedSize(515, 220);
     setModal(true);
 }
 

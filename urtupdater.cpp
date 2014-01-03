@@ -920,7 +920,7 @@ void UrTUpdater::launchGame(){
         s = "open " + updaterPath + launchString;
     }
     else {
-        s = "." + updaterPath + launchString;
+        s = updaterPath + launchString;
     }
     process.startDetached( s );
     process.waitForStarted();

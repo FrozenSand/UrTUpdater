@@ -333,6 +333,10 @@ void UrTUpdater::parseManifest(QString data){
                     changelog = updater.toElement().text();
                 }
 
+                if(updater.toElement().nodeName() == "Licence"){
+                    licenceText = updater.toElement().text();
+                }
+
                 if(updater.toElement().nodeName() == "NewsList"){
                     QDomNode newsListNode = updater.firstChild();
 
@@ -829,14 +833,43 @@ void UrTUpdater::openAboutPage(){
                              "Source code: https://github.com/Barbatos/UrTUpdater/");
 }
 
+void UrTUpdater::openLicencePage(){
+    QDialog *dialog = new QDialog(this);
+    dialog->setWindowTitle("Do you accept the terms of this licence?");
+    dialog->setMinimumWidth(600);
+    dialog->setMinimumHeight(500);
+
+    QTextEdit* txt = new QTextEdit(this);
+    txt->setText(licenceText);
+    txt->setMinimumWidth(600);
+    txt->setMinimumHeight(450);
+    txt->setParent(dialog);
+    txt->setReadOnly(true);
+    txt->show();
+
+    QPushButton *acceptButton = new QPushButton(dialog);
+    acceptButton->move(285, 470);
+    acceptButton->setText("Accept");
+    acceptButton->show();
+
+    QPushButton* rejectButton = new QPushButton(dialog);
+    rejectButton->move(200, 470);
+    rejectButton->setText("Reject");
+    rejectButton->show();
+
+    connect(acceptButton, SIGNAL(clicked()), dialog, SLOT(close()));
+    connect(rejectButton, SIGNAL(clicked()), this, SLOT(quit()));
+    dialog->exec();
+}
+
 void UrTUpdater::openChangelogPage(){
     QDialog *dialog = new QDialog(this);
+    dialog->setWindowTitle("Urban Terror Changelog");
     dialog->setFixedWidth(600);
     dialog->setFixedHeight(500);
     dialog->show();
 
     QTextEdit* txt = new QTextEdit(this);
-    txt->setDocumentTitle("Urban Terror Changelog");
     txt->setText(changelog);
     txt->setFixedWidth(600);
     txt->setFixedHeight(500);

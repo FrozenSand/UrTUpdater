@@ -70,6 +70,7 @@ public slots:
     void openHelpPage();
     void openAboutPage();
     void openChangelogPage();
+    void openLicencePage();
 
     void setSettings(int, int, int, int);
     void drawNews();
@@ -99,6 +100,7 @@ private:
 
     QString updaterPath;
     QString changelog;
+    QString licenceText;
     QString updaterVersion;
     QString password;
 

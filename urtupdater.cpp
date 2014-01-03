@@ -99,7 +99,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     globalDlBar = new QProgressBar(this);
     globalDlBar->move(150, 286);
     globalDlBar->setMinimumWidth(450);
-    globalDlBar->show();
+    globalDlBar->hide();
 
     playButton = new QPushButton(this);
     playButton->move(400, 385);
@@ -590,8 +590,7 @@ void UrTUpdater::downloadFiles(){
     if(filesToDownload.size() <= 0){
         dlBar->setRange(0, 100);
         dlBar->setValue(100);
-        globalDlBar->setRange(0, 100);
-        globalDlBar->setValue(100);
+        globalDlBar->hide();
         dlSpeed->hide();
         dlSize->hide();
         updateInProgress = false;
@@ -632,6 +631,7 @@ void UrTUpdater::downloadFiles(){
         dlBar->setRange(0, currentFile.fileSize.toInt());
         globalDlBar->setValue(0);
         globalDlBar->setRange(0, totalSizeToDl);
+        globalDlBar->show();
         dlSpeed->show();
         dlSize->show();
         loaderAnim->start();
@@ -676,10 +676,10 @@ void UrTUpdater::fileDownloaded(){
 
     else {
         dlBar->setRange(0, 100);
-        globalDlBar->setRange(0, 100);
-
         dlBar->setValue(100);
-        globalDlBar->setValue(100);
+        globalDlBar->hide();
+        dlSize->hide();
+        dlSpeed->hide();
 
         filesToDownload.clear();
         nbFilesToDl = 0;

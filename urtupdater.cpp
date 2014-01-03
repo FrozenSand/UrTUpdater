@@ -175,7 +175,12 @@ QString UrTUpdater::getPlatform()
     #endif
 
     #ifdef Q_OS_LINUX
-    return "Linux";
+    if(QSysInfo::WordSize == 64){
+        return "Linux64";
+    }
+    else {
+        return "Linux32";
+    }
     #endif
 
     #ifdef Q_OS_WIN32

@@ -197,7 +197,7 @@ QString UrTUpdater::getPlatform()
     return "Windows";
     #endif
 
-    return "Linux";
+    return "Linux32";
 }
 
 QString UrTUpdater::getCurrentPath(){
@@ -977,11 +977,12 @@ void UrTUpdater::launchGame(){
     }
 
     if(platform == "Mac"){
-        s = "open " + updaterPath + launchString;
+        s = "open \"" + updaterPath + launchString + "\"";
     }
     else {
         s = updaterPath + launchString;
     }
+
     process.startDetached( s );
     process.waitForStarted();
 }

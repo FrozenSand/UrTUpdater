@@ -350,6 +350,10 @@ void UrTUpdater::parseManifest(QString data){
 
             while(!updater.isNull()){
 
+                if(updater.toElement().nodeName() == "APIVersion"){
+                    apiVersion = updater.toElement().text();
+                }
+
                 if(updater.toElement().nodeName() == "Changelog"){
                     changelog = updater.toElement().text();
                 }
@@ -553,6 +557,7 @@ void UrTUpdater::parseManifest(QString data){
 }
 
 void UrTUpdater::work(){
+    checkAPIVersion();
     checkDownloadServer();
     checkGameEngine();
     checkVersion();
@@ -709,6 +714,13 @@ void UrTUpdater::fileDownloaded(){
         downloadedBytes = 0;
 
         getManifest("versionFiles");
+    }
+}
+
+void UrTUpdater::checkAPIVersion(){
+    if(apiVersion != URT_API_VERSION){
+        QMessageBox::critical(0, "Updater outdated", "This version of the Updater is outdated. Please download the new Updater here: http://get.urbanterror.info");
+        quit();
     }
 }
 

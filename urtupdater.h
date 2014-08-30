@@ -67,6 +67,7 @@ public slots:
     void checkDownloadServer();
     void checkGameEngine();
     void checkVersion();
+    void checkAPIVersion();
 
     void openSettings();
     void openHelpPage();
@@ -105,6 +106,7 @@ private:
     QString licenceText;
     QString updaterVersion;
     QString password;
+    QString apiVersion;
 
     QThread* dlThread;
     Download* dl;

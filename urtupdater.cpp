@@ -1037,13 +1037,13 @@ QString UrTUpdater::getSize(int *bytes){
     QString nb;
 
     if (*bytes < 1024) {
-        nb = " b ";
+        nb = " B ";
     } else if (*bytes < 1024*1024) {
         *bytes /= 1024;
-        nb = " kb ";
+        nb = " KB ";
     } else {
         *bytes /= 1024*1024;
-        nb = " Mb ";
+        nb = " MB ";
     }
 
     return nb;

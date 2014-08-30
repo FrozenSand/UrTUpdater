@@ -49,7 +49,6 @@ void Download::reconnect(){
 
     http = new QNetworkAccessManager(this);
     connect(timeout, SIGNAL(timeout()), this, SLOT(reconnect()));
-
     emit downloadFile(currentFolder, currentFile, fileSize, fileUrl);
 }
 
@@ -109,20 +108,20 @@ void Download::filePart(){
     downloadedBytes += count;
 
     if (downloadedBytes == 0){
-        emit bytesDownloaded(0, "b/s", 0, 0);
+        emit bytesDownloaded(0, "B/s", 0, 0);
         return;
     }
 
     speed = downloadedBytes * 1000.0 / downloadTime.elapsed();
 
     if (speed < 1024) {
-        unit = "b/s";
+        unit = "B/s";
     } else if (speed < 1024*1024) {
         speed /= 1024;
-        unit = "kb/s";
+        unit = "KB/s";
     } else {
         speed /= 1024*1024;
-        unit = "Mb/s";
+        unit = "MB/s";
     }
 
     emit bytesDownloaded(speed, unit, downloadedBytes, count);

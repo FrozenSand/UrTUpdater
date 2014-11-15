@@ -89,6 +89,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     currentChecksum->setText("");
     currentChecksum->hide();
 
+    connect(this, SIGNAL(checkingChanged(int)), this, SLOT(setDLValue(int)));
+
     globalDlText = new QLabel(this);
     globalDlText->move(150, 273);
     globalDlText->setStyleSheet("color:white;");
@@ -112,6 +114,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     dlBar->move(150, 250);
     dlBar->setFixedWidth(485);
     dlBar->setFixedHeight(20);
+    dlBar->setRange(0, 100);
     dlBar->show();
 
     globalDlBar = new QProgressBar(this);
@@ -532,6 +535,7 @@ void UrTUpdater::parseManifest(QString data){
                             i++;
 
                             currentChecksum->setText(QString("Checking %1 (%2 of %3)").arg(fileName).arg(i).arg(l));
+                            emit checkingChanged(i * 100.0 / l);
 
                             // If the file does not exist, it must be downloaded.
                             if(!f->exists()){
@@ -608,6 +612,10 @@ void UrTUpdater::work(){
         readyToProcess = true;
         getManifest("versionFiles");
     }
+}
+
+void UrTUpdater::setDLValue(int v){
+    dlBar->setValue(v);
 }
 
 void UrTUpdater::startDlThread(){

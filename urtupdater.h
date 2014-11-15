@@ -48,6 +48,8 @@ public slots:
     void startDlThread();
     void work();
 
+    void setDLValue(int);
+
     QString getPlatform();
     QString getCurrentPath();
 
@@ -93,6 +95,7 @@ public slots:
 
 signals:
     void dlFile(QString, QString, int, QString);
+    void checkingChanged(int percent);
 
 private:
     Ui::UrTUpdater *ui;

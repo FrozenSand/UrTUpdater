@@ -80,6 +80,13 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     dlText->setText("Getting information from the API...");
     dlText->show();
 
+    currentChecksum = new QLabel(this);
+    currentChecksum->move(150, 270);
+    currentChecksum->setStyleSheet("color:white;");
+    currentChecksum->setMinimumWidth(450);
+    currentChecksum->setText("");
+    currentChecksum->hide();
+
     globalDlText = new QLabel(this);
     globalDlText->move(150, 273);
     globalDlText->setStyleSheet("color:white;");
@@ -294,7 +301,7 @@ void UrTUpdater::saveLocalConfig(){
 
     f->close();
 
-    qDebug() << "Local config saved." << endl;
+    // qDebug() << "Local config saved." << endl;
 
     delete f;
     delete xml;
@@ -481,6 +488,11 @@ void UrTUpdater::parseManifest(QString data){
                     QDomNode files = updater.firstChild();
 
                     dlText->setText("Checking the game files checksums. It may take a few minutes...");
+                    currentChecksum->show();
+
+                    int i = 0, l;
+
+                    l = updater.childNodes().length();
 
                     while(!files.isNull()){
                         if(files.nodeName() == "File"){
@@ -514,6 +526,10 @@ void UrTUpdater::parseManifest(QString data){
                             QString filePath(updaterPath + fileDir + fileName);
                             QFile* f = new QFile(filePath);
 
+                            i++;
+
+                            currentChecksum->setText(QString("Checking %1 (%2 of %3)").arg(fileName).arg(i).arg(l));
+
                             // If the file does not exist, it must be downloaded.
                             if(!f->exists()){
                                 mustDownload = true;
@@ -546,6 +562,8 @@ void UrTUpdater::parseManifest(QString data){
                         }
                         files = files.nextSibling();
                     }
+
+                    currentChecksum->hide();
                 }
                 updater = updater.nextSibling();
             }

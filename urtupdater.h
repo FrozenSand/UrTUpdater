@@ -127,6 +127,7 @@ private:
     QProgressBar* globalDlBar;
     QLabel* globalDlText;
     QLabel* dlText;
+    QLabel* currentChecksum;
     QLabel* dlSpeed;
     QLabel* dlSize;
 

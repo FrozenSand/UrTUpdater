@@ -143,7 +143,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     changelogButton->setMinimumHeight(50);
     changelogButton->setStyleSheet("padding-bottom: 2px; color: white;font-weight: bold; font-size: 120%; text-transform: uppercase;background-color:#727272;height:50px;");
     changelogButton->setText("Changelog");
-    changelogButton->show();
+    changelogButton->hide();
 
     loaderAnim = new QMovie(":/images/urt_updating.gif");
     connect(loaderAnim, SIGNAL(frameChanged(int)), this, SLOT(setLoadingIcon(int)));
@@ -365,6 +365,7 @@ void UrTUpdater::parseManifest(QString data){
 
                 if(updater.toElement().nodeName() == "Changelog"){
                     changelog = updater.toElement().text();
+                    changelogButton->show();
                 }
 
                 if(updater.toElement().nodeName() == "Licence"){

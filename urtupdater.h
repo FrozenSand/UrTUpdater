@@ -48,7 +48,8 @@ public slots:
     void startDlThread();
     void work();
 
-    void setDLValue(int);
+    void setDLValue(int v);
+    void setDLValueP(qint64 r, qint64 t);
 
     QString getPlatform();
     QString getCurrentPath();

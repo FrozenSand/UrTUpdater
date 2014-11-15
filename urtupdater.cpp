@@ -328,6 +328,7 @@ void UrTUpdater::getManifest(QString query){
     url.addQueryItem("updaterVersion", updaterVersion);
 
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
+    connect(apiAnswer, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(setDLValueP(qint64, qint64)));
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));
     connect(apiAnswer, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
 }
@@ -491,6 +492,7 @@ void UrTUpdater::parseManifest(QString data){
                 }
 
                 else if(updater.toElement().nodeName() == "Files"){
+                    emit checkingChanged(0);
                     QDomNode files = updater.firstChild();
 
                     dlText->setText("Checking the game files checksums. It may take a few minutes...");
@@ -616,6 +618,10 @@ void UrTUpdater::work(){
 
 void UrTUpdater::setDLValue(int v){
     dlBar->setValue(v);
+}
+
+void UrTUpdater::setDLValueP(qint64 r, qint64 t){
+    dlBar->setValue(r * 100.0 / t);
 }
 
 void UrTUpdater::startDlThread(){

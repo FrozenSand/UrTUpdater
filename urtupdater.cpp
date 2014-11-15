@@ -24,12 +24,14 @@
 #include "urtupdater.h"
 #include "ui_urtupdater.h"
 
+#define CHANGELOG_EMPTY_TEXT "Empty."
+
 UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpdater)
 {
     ui->setupUi(this);
 
     updaterVersion = "4.0.1";
-    changelog = "Empty.";
+    changelog = CHANGELOG_EMPTY_TEXT;
     password = "";
     downloadServer = -1;
     gameEngine = -1;
@@ -948,6 +950,11 @@ void UrTUpdater::openLicencePage(){
 }
 
 void UrTUpdater::openChangelogPage(){
+    if (changelog == CHANGELOG_EMPTY_TEXT) {
+        QMessageBox::information(this, "Sorry", "No changelog available :(");
+        return;
+    }
+    
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle("Urban Terror Changelog");
     dialog->setFixedWidth(600);

@@ -48,6 +48,9 @@ public slots:
     void startDlThread();
     void work();
 
+    void setDLValue(int v);
+    void setDLValueP(qint64 r, qint64 t);
+
     QString getPlatform();
     QString getCurrentPath();
 
@@ -93,6 +96,7 @@ public slots:
 
 signals:
     void dlFile(QString, QString, int, QString);
+    void checkingChanged(int percent);
 
 private:
     Ui::UrTUpdater *ui;
@@ -127,6 +131,7 @@ private:
     QProgressBar* globalDlBar;
     QLabel* globalDlText;
     QLabel* dlText;
+    QLabel* currentChecksum;
     QLabel* dlSpeed;
     QLabel* dlSize;
 

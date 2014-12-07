@@ -24,12 +24,14 @@
 #include "urtupdater.h"
 #include "ui_urtupdater.h"
 
+#define CHANGELOG_EMPTY_TEXT "Empty."
+
 UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpdater)
 {
     ui->setupUi(this);
 
     updaterVersion = "4.0.1";
-    changelog = "Empty.";
+    changelog = CHANGELOG_EMPTY_TEXT;
     password = "";
     downloadServer = -1;
     gameEngine = -1;
@@ -80,6 +82,15 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     dlText->setText("Getting information from the API...");
     dlText->show();
 
+    currentChecksum = new QLabel(this);
+    currentChecksum->move(150, 270);
+    currentChecksum->setStyleSheet("color:white;");
+    currentChecksum->setMinimumWidth(450);
+    currentChecksum->setText("");
+    currentChecksum->hide();
+
+    connect(this, SIGNAL(checkingChanged(int)), this, SLOT(setDLValue(int)));
+
     globalDlText = new QLabel(this);
     globalDlText->move(150, 273);
     globalDlText->setStyleSheet("color:white;");
@@ -103,6 +114,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     dlBar->move(150, 250);
     dlBar->setFixedWidth(485);
     dlBar->setFixedHeight(20);
+    dlBar->setRange(0, 100);
     dlBar->show();
 
     globalDlBar = new QProgressBar(this);
@@ -134,7 +146,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     changelogButton->setMinimumHeight(50);
     changelogButton->setStyleSheet("padding-bottom: 2px; color: white;font-weight: bold; font-size: 120%; text-transform: uppercase;background-color:#727272;height:50px;");
     changelogButton->setText("Changelog");
-    changelogButton->show();
+    changelogButton->hide();
 
     loaderAnim = new QMovie(":/images/urt_updating.gif");
     connect(loaderAnim, SIGNAL(frameChanged(int)), this, SLOT(setLoadingIcon(int)));
@@ -294,7 +306,7 @@ void UrTUpdater::saveLocalConfig(){
 
     f->close();
 
-    qDebug() << "Local config saved." << endl;
+    // qDebug() << "Local config saved." << endl;
 
     delete f;
     delete xml;
@@ -316,6 +328,7 @@ void UrTUpdater::getManifest(QString query){
     url.addQueryItem("updaterVersion", updaterVersion);
 
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
+    connect(apiAnswer, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(setDLValueP(qint64, qint64)));
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));
     connect(apiAnswer, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
 }
@@ -356,6 +369,7 @@ void UrTUpdater::parseManifest(QString data){
 
                 if(updater.toElement().nodeName() == "Changelog"){
                     changelog = updater.toElement().text();
+                    changelogButton->show();
                 }
 
                 if(updater.toElement().nodeName() == "Licence"){
@@ -478,9 +492,15 @@ void UrTUpdater::parseManifest(QString data){
                 }
 
                 else if(updater.toElement().nodeName() == "Files"){
+                    emit checkingChanged(0);
                     QDomNode files = updater.firstChild();
 
                     dlText->setText("Checking the game files checksums. It may take a few minutes...");
+                    currentChecksum->show();
+
+                    int i = 0, l;
+
+                    l = updater.childNodes().length();
 
                     while(!files.isNull()){
                         if(files.nodeName() == "File"){
@@ -514,6 +534,11 @@ void UrTUpdater::parseManifest(QString data){
                             QString filePath(updaterPath + fileDir + fileName);
                             QFile* f = new QFile(filePath);
 
+                            i++;
+
+                            currentChecksum->setText(QString("Checking %1 (%2 of %3)").arg(fileName).arg(i).arg(l));
+                            emit checkingChanged(i * 100.0 / l);
+
                             // If the file does not exist, it must be downloaded.
                             if(!f->exists()){
                                 mustDownload = true;
@@ -546,6 +571,8 @@ void UrTUpdater::parseManifest(QString data){
                         }
                         files = files.nextSibling();
                     }
+
+                    currentChecksum->hide();
                 }
                 updater = updater.nextSibling();
             }
@@ -587,6 +614,14 @@ void UrTUpdater::work(){
         readyToProcess = true;
         getManifest("versionFiles");
     }
+}
+
+void UrTUpdater::setDLValue(int v){
+    dlBar->setValue(v);
+}
+
+void UrTUpdater::setDLValueP(qint64 r, qint64 t){
+    dlBar->setValue(r * 100.0 / t);
 }
 
 void UrTUpdater::startDlThread(){
@@ -930,6 +965,11 @@ void UrTUpdater::openLicencePage(){
 }
 
 void UrTUpdater::openChangelogPage(){
+    if (changelog == CHANGELOG_EMPTY_TEXT) {
+        QMessageBox::information(this, "Sorry", "No changelog available :(");
+        return;
+    }
+    
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle("Urban Terror Changelog");
     dialog->setFixedWidth(600);

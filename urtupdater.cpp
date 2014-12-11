@@ -371,7 +371,6 @@ void UrTUpdater::parseManifest(QString data){
 
                 if(updater.toElement().nodeName() == "Changelog"){
                     changelog = updater.toElement().text();
-                    changelogButton->show();
                 }
 
                 if(updater.toElement().nodeName() == "Licence"){
@@ -588,6 +587,12 @@ void UrTUpdater::parseManifest(QString data){
 
 void UrTUpdater::work(){
     currentChecksum->hide();
+
+    // Workaround - you can't call ->show() from parseManifest()
+    // because this function is running on its own thread.
+    if (changelog != CHANGELOG_EMPTY_TEXT){
+        changelogButton->show();
+    }
 
     checkAPIVersion();
     checkDownloadServer();

@@ -331,6 +331,8 @@ void UrTUpdater::parseAPIAnswer(){
     QByteArray  apiByteAnswer = apiAnswer->readAll();
     QString     apiData = QString(apiByteAnswer);
 
+    currentChecksum->show();
+
     QFutureWatcher<void>* watcher = new QFutureWatcher<void>();
     connect(watcher, SIGNAL(finished()), this, SLOT(work()));
     QFuture<void> parser = QtConcurrent::run(this, &UrTUpdater::parseManifest, apiData);
@@ -488,7 +490,8 @@ void UrTUpdater::parseManifest(QString data){
                     QDomNode files = updater.firstChild();
 
                     dlText->setText("Checking the game files checksums. It may take a few minutes...");
-                    currentChecksum->show();
+
+                    //currentChecksum->show(); -- @Barbatos: commented out, you can't call ->show() for a var spawned in another thread
 
                     int i = 0, l;
 
@@ -563,7 +566,7 @@ void UrTUpdater::parseManifest(QString data){
                         files = files.nextSibling();
                     }
 
-                    currentChecksum->hide();
+                    currentChecksum->setText("");
                 }
                 updater = updater.nextSibling();
             }
@@ -575,6 +578,8 @@ void UrTUpdater::parseManifest(QString data){
 }
 
 void UrTUpdater::work(){
+    currentChecksum->hide();
+
     checkAPIVersion();
     checkDownloadServer();
     checkGameEngine();

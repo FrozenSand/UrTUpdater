@@ -24,13 +24,11 @@
 #include "urtupdater.h"
 #include "ui_urtupdater.h"
 
-#define CHANGELOG_EMPTY_TEXT "Empty."
-
 UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpdater)
 {
     ui->setupUi(this);
 
-    updaterVersion = "4.0.1";
+    updaterVersion = URT_UPDATER_VERSION;
     changelog = CHANGELOG_EMPTY_TEXT;
     password = "";
     downloadServer = -1;
@@ -88,8 +86,6 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     currentChecksum->setMinimumWidth(450);
     currentChecksum->setText("");
     currentChecksum->hide();
-
-    connect(this, SIGNAL(checkingChanged(int)), this, SLOT(setDLValue(int)));
 
     globalDlText = new QLabel(this);
     globalDlText->move(150, 273);
@@ -159,6 +155,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     connect(playButton, SIGNAL(clicked()), this, SLOT(launchGame()));
     connect(changelogButton, SIGNAL(clicked()), this, SLOT(openChangelogPage()));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
+    connect(this, SIGNAL(checkingChanged(int)), this, SLOT(setDLValue(int)));
+    connect(this, SIGNAL(requestNewDlLabel(QString)), this, SLOT(updateDlLabel(QString)));
 
     init();
 }
@@ -322,9 +320,9 @@ void UrTUpdater::getManifest(QString query){
     url.addQueryItem("platform", getPlatform());
     url.addQueryItem("query", query);
     url.addQueryItem("password", password);
-    url.addQueryItem("version", QString(currentVersion));
-    url.addQueryItem("engine", QString(gameEngine));
-    url.addQueryItem("server", QString(downloadServer));
+    url.addQueryItem("version", QString::number(currentVersion));
+    url.addQueryItem("engine", QString::number(gameEngine));
+    url.addQueryItem("server", QString::number(downloadServer));
     url.addQueryItem("updaterVersion", updaterVersion);
 
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
@@ -345,10 +343,15 @@ void UrTUpdater::parseAPIAnswer(){
     watcher->setFuture(parser);
 }
 
+void UrTUpdater::updateDlLabel(QString label){
+    dlText->setText(label);
+}
+
 void UrTUpdater::parseManifest(QString data){
     QDomDocument* dom = new QDomDocument();
     dom->setContent(data);
 
+    packsList.clear();
     filesToDownload.clear();
     downloadServers.clear();
     enginesList.clear();
@@ -357,7 +360,7 @@ void UrTUpdater::parseManifest(QString data){
 
     QDomNode node = dom->firstChild();
 
-    dlText->setText("Parsing the answer of the API...");
+    emit requestNewDlLabel("Parsing the answer of the API...");
 
     while(!node.isNull()){
         if(node.toElement().nodeName() == "Updater"){
@@ -496,9 +499,7 @@ void UrTUpdater::parseManifest(QString data){
                     emit checkingChanged(0);
                     QDomNode files = updater.firstChild();
 
-                    dlText->setText("Checking the game files checksums. It may take a few minutes...");
-
-                    //currentChecksum->show(); -- @Barbatos: commented out, you can't call ->show() for a var spawned in another thread
+                    emit requestNewDlLabel("Checking the game files checksums. It may take a few minutes...");
 
                     int i = 0, l;
 
@@ -558,6 +559,9 @@ void UrTUpdater::parseManifest(QString data){
                                     mustDownload = true;
                                 }
                             }
+                            if (!fileMd5.isEmpty() && !fileName.isEmpty()){
+                                packsList.append(fileName);
+                            }
 
                             if(mustDownload){
                                 fileInfo_s fi;
@@ -605,6 +609,7 @@ void UrTUpdater::work(){
     }
 
     if(readyToProcess){
+        checkFiles();
         downloadFiles();
     }
     else {
@@ -675,8 +680,7 @@ void UrTUpdater::downloadFiles(){
         return;
     }
 
-    if(filesToDownload.size() > 0){
-
+    else {
         if(askBeforeUpdating == 1){
             QMessageBox msg;
             int result;
@@ -762,9 +766,27 @@ void UrTUpdater::fileDownloaded(){
     }
 }
 
+void UrTUpdater::checkFiles(){
+    QStringList nameFilter("zUrT*.pk3");
+    QDir filesPath(updaterPath + URT_GAME_SUBDIR);
+    QStringList filesList = filesPath.entryList(nameFilter);
+
+    if (packsList.size() <= 0){
+        return;
+    }
+
+    foreach (QString file, filesList){
+        if (!packsList.contains(file)){
+            QFile* fileToRm = new QFile(updaterPath + URT_GAME_SUBDIR + "/" + file);
+            fileToRm->remove();
+            delete fileToRm;
+        }
+    }
+}
+
 void UrTUpdater::checkAPIVersion(){
-    if(apiVersion != URT_API_VERSION){
-        QMessageBox::critical(0, "Updater outdated", "This version of the Updater is outdated. Please download the new Updater here: http://get.urbanterror.info");
+    if(apiVersion != updaterVersion){
+        QMessageBox::critical(0, "Updater outdated", "This version ("+updaterVersion+") of the Updater is outdated. Please download the new Updater here: http://get.urbanterror.info");
         quit();
     }
 }

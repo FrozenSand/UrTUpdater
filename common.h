@@ -55,11 +55,12 @@
 #include <QtConcurrentRun>
 #include <QSysInfo>
 
-#define URT_GAME_NAME       "Urban Terror"
-#define URT_GAME_SUBDIR     "q3ut4"
-#define URT_API_LINK        "http://www.urbanterror.info/api/updaterv4/"
-#define URT_API_VERSION     "4.0.1"
-#define URT_UPDATER_CFG     "updater-cfg.xml"
+#define URT_GAME_NAME           "Urban Terror"
+#define URT_GAME_SUBDIR         "q3ut4"
+#define URT_API_LINK            "http://www.urbanterror.info/api/updaterv4/"
+#define URT_UPDATER_VERSION     "4.0.1"
+#define URT_UPDATER_CFG         "updater-cfg.xml"
+#define CHANGELOG_EMPTY_TEXT    "Empty."
 
 typedef struct {
     QString fileName;

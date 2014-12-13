@@ -71,6 +71,7 @@ public slots:
     void checkGameEngine();
     void checkVersion();
     void checkAPIVersion();
+    void checkFiles();
 
     void openSettings();
     void openHelpPage();
@@ -94,9 +95,12 @@ public slots:
 
     void launchGame();
 
+    void updateDlLabel(QString);
+
 signals:
     void dlFile(QString, QString, int, QString);
     void checkingChanged(int percent);
+    void requestNewDlLabel(QString);
 
 private:
     Ui::UrTUpdater *ui;
@@ -143,6 +147,7 @@ private:
     QList<engineInfo_s>     enginesList;
     QList<versionInfo_s>    versionsList;
     QList<QString>          newsList;
+    QList<QString>          packsList;
 
     fileInfo_s currentFile;
 

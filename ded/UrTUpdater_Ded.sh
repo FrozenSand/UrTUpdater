@@ -335,6 +335,9 @@ function downloadFiles ()
                     errored=1
                     rm -f "${fileName[$i]}"
                 fi
+                if [[ "${fileName[$i]}" =~ .*\.i386.* ]] || [[ "${fileName[$i]}" =~ .*\.x86_64.* ]]; then
+                    chmod +x "${fileName[$i]}"
+                fi
             else
                 apiError
             fi

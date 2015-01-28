@@ -544,7 +544,9 @@ void UrTUpdater::parseManifest(QString data){
 
                             // If the file does not exist, it must be downloaded.
                             if(!f->exists()){
-                                mustDownload = true;
+                                if(!fileMd5.isEmpty()){
+                                    mustDownload = true;
+                                }
                             }
 
                             // If the md5 string is empty, it means that the API wants

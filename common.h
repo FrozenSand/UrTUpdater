@@ -54,6 +54,7 @@
 #include <QFutureWatcher>
 #include <QtConcurrentRun>
 #include <QSysInfo>
+#include <QNetworkProxyFactory>
 
 #define URT_GAME_NAME           "Urban Terror"
 #define URT_GAME_SUBDIR         "q3ut4"

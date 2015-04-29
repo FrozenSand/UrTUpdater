@@ -325,6 +325,8 @@ void UrTUpdater::getManifest(QString query){
     url.addQueryItem("server", QString::number(downloadServer));
     url.addQueryItem("updaterVersion", updaterVersion);
 
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
+
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
     connect(apiAnswer, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(setDLValueP(qint64, qint64)));
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));
@@ -928,7 +930,6 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
     if(!error.isEmpty()){
         if(critical == true){
             QMessageBox::critical(0, "Download error", error);
-            dlThread->terminate();
             quit();
         }
         else {
@@ -1152,6 +1153,10 @@ int UrTUpdater::getTotalSizeToDl(){
 void UrTUpdater::quit(){
     if(!firstLaunch){
         saveLocalConfig();
+    }
+
+    if(dlThread->isRunning()){
+        dlThread->deleteLater();
     }
 
     exit(0);

@@ -137,6 +137,14 @@ void Download::downloadFinished(){
 
         currentDownload->close();
 
+        // The downloaded file is too small, most likely because of an error page
+        // on the server on which we download the file
+        if (downloadedBytes < 1000)
+        {
+            downloadError(QNetworkReply::ContentNotFoundError);
+            return;
+        }
+
         // Apply chmod +x for executable files on linux
         if((currentFile.contains(".i386", Qt::CaseInsensitive) || (currentFile.contains(".x86_64", Qt::CaseInsensitive))) && (platform == "Linux"))
         {

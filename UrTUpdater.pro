@@ -15,38 +15,37 @@
 # License along with this software; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# @version    4.0.1
+# @version    4.0.2
 # @author     Charles 'Barbatos' Duprey
 # @email      barbatos@urbanterror.info
-# @copyright  2013/2014 Frozen Sand / 0870760 B.C. Ltd
-#
+# @copyright  2013-2015 Frozen Sand / 0870760 B.C. Ltd
 
-QT       += core gui network widgets xml concurrent
+QT          +=  core gui network widgets xml concurrent
 
-CONFIG   += x86 static
+CONFIG      +=  x86 static
 
-TARGET = UrTUpdater
-TEMPLATE = app
+TARGET       =  UrTUpdater
+TEMPLATE     =  app
 
 
-SOURCES += main.cpp\
-        urtupdater.cpp \
-    download.cpp \
-    settings.cpp
+SOURCES     +=  main.cpp\
+                urtupdater.cpp \
+                download.cpp \
+                settings.cpp
 
-HEADERS  += urtupdater.h \
-    common.h \
-    download.h \
-    settings.h
+HEADERS     +=  urtupdater.h \
+                common.h \
+                download.h \
+                settings.h
 
-FORMS    += urtupdater.ui
+FORMS       +=  urtupdater.ui
 
-RESOURCES += \
-    images.qrc
+RESOURCES   +=  images.qrc
+
+RC_FILE      =  urtupdater.rc
+ICON         =  images/urtupdater.icns
 
 static {
-    DEFINES += STATIC
+    DEFINES +=  STATIC
 }
 
-RC_FILE = urtupdater.rc
-ICON = images/urtupdater.icns

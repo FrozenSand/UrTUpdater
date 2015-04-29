@@ -15,10 +15,10 @@
   * License along with this software; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * @version    4.0.1
+  * @version    4.0.2
   * @author     Charles 'Barbatos' Duprey
   * @email      barbatos@urbanterror.info
-  * @copyright  2013/2014 Frozen Sand / 0870760 B.C. Ltd
+  * @copyright  2013-2015 Frozen Sand / 0870760 B.C. Ltd
   */
 
 #ifndef COMMON_H
@@ -59,7 +59,7 @@
 #define URT_GAME_NAME           "Urban Terror"
 #define URT_GAME_SUBDIR         "q3ut4"
 #define URT_API_LINK            "http://www.urbanterror.info/api/updaterv4/"
-#define URT_UPDATER_VERSION     "4.0.1"
+#define URT_UPDATER_VERSION     "4.0.2"
 #define URT_UPDATER_CFG         "updater-cfg.xml"
 #define CHANGELOG_EMPTY_TEXT    "Empty."
 

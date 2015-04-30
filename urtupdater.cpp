@@ -1155,7 +1155,7 @@ void UrTUpdater::quit(){
         saveLocalConfig();
     }
 
-    if(dlThread->isRunning()){
+    if(threadStarted){
         dlThread->deleteLater();
     }
 

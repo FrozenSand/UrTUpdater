@@ -15,10 +15,10 @@
   * License along with this software; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * @version    4.0.1
+  * @version    4.0.2
   * @author     Charles 'Barbatos' Duprey
   * @email      barbatos@urbanterror.info
-  * @copyright  2013/2014 Frozen Sand / 0870760 B.C. Ltd
+  * @copyright  2013-2015 Frozen Sand / 0870760 B.C. Ltd
   */
 
 #include "download.h"
@@ -136,6 +136,14 @@ void Download::downloadFinished(){
         downloadInProgress = false;
 
         currentDownload->close();
+
+        // The downloaded file is too small, most likely because of an error page
+        // on the server on which we download the file
+        if (downloadedBytes < 1000)
+        {
+            downloadError(QNetworkReply::ContentNotFoundError);
+            return;
+        }
 
         // Apply chmod +x for executable files on linux
         if((currentFile.contains(".i386", Qt::CaseInsensitive) || (currentFile.contains(".x86_64", Qt::CaseInsensitive))) && (platform == "Linux"))

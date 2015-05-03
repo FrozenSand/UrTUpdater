@@ -15,10 +15,10 @@
   * License along with this software; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * @version    4.0.1
+  * @version    4.0.2
   * @author     Charles 'Barbatos' Duprey
   * @email      barbatos@urbanterror.info
-  * @copyright  2013/2014 Frozen Sand / 0870760 B.C. Ltd
+  * @copyright  2013-2015 Frozen Sand / 0870760 B.C. Ltd
   */
 
 #include "urtupdater.h"
@@ -325,6 +325,8 @@ void UrTUpdater::getManifest(QString query){
     url.addQueryItem("server", QString::number(downloadServer));
     url.addQueryItem("updaterVersion", updaterVersion);
 
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
+
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
     connect(apiAnswer, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(setDLValueP(qint64, qint64)));
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));
@@ -544,7 +546,9 @@ void UrTUpdater::parseManifest(QString data){
 
                             // If the file does not exist, it must be downloaded.
                             if(!f->exists()){
-                                mustDownload = true;
+                                if(!fileMd5.isEmpty()){
+                                    mustDownload = true;
+                                }
                             }
 
                             // If the md5 string is empty, it means that the API wants
@@ -926,7 +930,6 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
     if(!error.isEmpty()){
         if(critical == true){
             QMessageBox::critical(0, "Download error", error);
-            dlThread->terminate();
             quit();
         }
         else {
@@ -1150,6 +1153,10 @@ int UrTUpdater::getTotalSizeToDl(){
 void UrTUpdater::quit(){
     if(!firstLaunch){
         saveLocalConfig();
+    }
+
+    if(threadStarted){
+        dlThread->deleteLater();
     }
 
     exit(0);

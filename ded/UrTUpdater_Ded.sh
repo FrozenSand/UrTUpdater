@@ -54,7 +54,7 @@ fi
 # eg. "versionInfo" or "versionFiles"
 function doManifest ()
 {
-    local manifest=$($CURL -X POST -H "Content-Type: application/x-www-form-urlencoded;charset=utf-8" -d "platform=${PLATFORM}" -d "query=$1" -d "password=${PASSWORD}" -d "version=${CURRENTVERSION}" -d "engine=${GAMEENGINE}" -d "server=${DOWNLOADSERVER}" -d "updaterVersion=${UPDATERVERSION}" "$APIURL")
+    local manifest=$($CURL -X POST -H "Content-Type: application/x-www-form-urlencoded;charset=utf-8" -d "platform=${PLATFORM}" -d "query=$1" -d "password=${PASSWORD}" -d "version=${CURRENTVERSION}" -d "engine=${GAMEENGINE}" -d "server=${DOWNLOADSERVER}" -d "updaterVersion=${UPDATERVERSION}" $curlOpts "$APIURL")
 
     if [ -z "$manifest" ]; then
         echo "ERROR: Failed to connect to API" 1>&2
@@ -252,6 +252,10 @@ function doBrowser ()
 
 function drawLicence ()
 {
+    if [ $runQuiet -eq 1 ]; then
+        return
+    fi
+
     if [ -z "$licenceText" ]; then
         apiError
     fi
@@ -261,6 +265,10 @@ function drawLicence ()
 
 function drawNews ()
 {
+    if [ $runQuiet -eq 1 ]; then
+        return
+    fi
+
     if [ -z "$newsList" ]; then
         apiError
     fi
@@ -298,6 +306,10 @@ function checkFiles ()
 
 function playGame ()
 {
+    if [ $runQuiet -eq 1 ]; then
+        return
+    fi
+
     read -p "Would you like to play now? [y/n]: " -e INPUT
     if [ "$INPUT" == "y" -o "$INPUT" == "Y" ]; then
         for i in `seq $engineCount`
@@ -314,10 +326,12 @@ function downloadFiles ()
 {
     local errored=0
     if [ $fileCount -eq 0 ]; then
-        echo 'Your game is up to date!'
+        if [ $runQuiet -eq 0 ]; then
+            echo 'Your game is up to date!'
+        fi
         playGame
     else
-        if [ $ASKBEFOREUPDATING -eq 1 ]; then
+        if [ $ASKBEFOREUPDATING -eq 1 -a $runQuiet -eq 0 ]; then
             read -p "A new update is available. Would you like to download it now? [y/n]: " -e INPUT
             if [ "$INPUT" != "y" -a "$INPUT" != "Y" ]; then
                 echo 'Update cancelled - your game is outdated!'
@@ -329,7 +343,7 @@ function downloadFiles ()
         do
             cd "${CWD}/${filePath[$i]}" || exit 6
             if [ -n "${fileUrl[$i]}" -a -n "${fileName[$i]}" ]; then
-                $CURL "${fileUrl[$i]}" -o "${fileName[$i]}"
+                $CURL $curlOpts "${fileUrl[$i]}" -o "${fileName[$i]}"
                 if ! echo "${fileMd5[$i]}  ${fileName[$i]}" | md5sum -c >/dev/null 2>&1 ; then
                     echo "ERROR: Downloaded file (${fileName[$i]}) is corrupt\! Re-run this updater to try again..." 1>&2
                     errored=1
@@ -347,7 +361,9 @@ function downloadFiles ()
             echo "ERROR: Some downloaded files were corrupt. Re-run the updater to try again." 1>&2
             exit 7
         fi
-        echo 'Your game is now up to date!'
+        if [ $runQuiet -eq 0 ]; then
+            echo 'Your game is now up to date!'
+        fi
         playGame
     fi
 }
@@ -413,8 +429,16 @@ Update Urban Terror
 
   -h, --help          This help
   -s, --settings      Modify updater settings
+  -q, --quiet         Run non-interactively (for cron use etc.)
 EOF
     exit
+fi
+
+runQuiet=0
+curlOpts=""
+if [ "$1" == "-q" -o "$1" == "--quiet" ]; then
+    runQuiet=1
+    curlOpts="-s"
 fi
 
 doManifest "versionInfo"
@@ -425,6 +449,10 @@ checkVersion
 drawNews
 
 if [ $firstLaunch -eq 1 ]; then
+    if [ $runQuiet -eq 1 ]; then
+        echo "ERROR: Initial run must be interactive."
+        exit 9
+    fi
     drawLicence
     read -p "Do you accept the terms of this licence? [y/n]: " -e INPUT
     if [ "$INPUT" != "y" -a "$INPUT" != "Y" ]; then

@@ -170,6 +170,12 @@ void UrTUpdater::init(){
         QMessageBox msg;
         int result;
 
+        // OSX: do not allow trying to launch the Updater from its .dmg disk image
+        if (updaterPath.startsWith("/Volumes/")){
+            folderError(updaterPath + URT_GAME_SUBDIR);
+            return;
+        }
+
         msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msg.setIcon(QMessageBox::Information);
         msg.setText("The game " URT_GAME_NAME " will be installed in this path:\n\n" + updaterPath + "\n\n"
@@ -944,8 +950,18 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
 }
 
 void UrTUpdater::folderError(QString folder){
-    QMessageBox::critical(this, folder + " file/folder", "Could not create the file/folder " + folder + ".\n"
-                          + "Please move the updater to a folder where it has sufficient permissions.");
+    if (getPlatform() == "Mac")
+    {
+        QMessageBox::critical(this, folder + " file/folder", "Could not create the file/folder " + folder + ".\n\n"
+                              + "You must extract UrTUpdater.app from this .dmg disk image before launching it.\n\n"
+                              + "Please move UrTUpdater.app to an empty folder where it has sufficient permissions.");
+    }
+    else
+    {
+        QMessageBox::critical(this, folder + " file/folder", "Could not create the file/folder " + folder + ".\n"
+                              + "Please move the updater to a folder where it has sufficient permissions.");
+    }
+
     quit();
 }
 

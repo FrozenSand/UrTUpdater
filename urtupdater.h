@@ -53,6 +53,7 @@ public slots:
 
     QString getPlatform();
     QString getCurrentPath();
+    QString getBundlePath();
 
     void parseAPIAnswer();
     void getManifest(QString query);

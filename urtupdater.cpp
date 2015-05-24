@@ -177,11 +177,11 @@ void UrTUpdater::init(){
         }
 
         // OSX: Staring the updater in /Applications/ will be a mess.
-        // We'll ask the user if he allows us to move on a subdir called UrbanTerror.
+        // We'll ask the user if he allows us to move in a subdir called UrbanTerror.
         if (updaterPath == "/Applications/"){
             msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             msg.setIcon(QMessageBox::Information);
-            msg.setText("I'm sorry, but I can't run in /Applications/. I will create a big mess if I'm not in a subfolder (or somewhere else)\n\nDo you allow me to create a subfolder called UrbanTerror in /Applications/ and move myself into it ?");
+            msg.setText("You can't run me in the /Applications/ folder. \n\nDo you allow me to create a subfolder called UrbanTerror in /Applications/ and move myself into it ?");
             result = msg.exec();
 
             // User don't want us to move. But we don't want to mess inside the /Applications/ folder, so we quit.
@@ -190,7 +190,7 @@ void UrTUpdater::init(){
             }
 
             if(!QDir().mkdir("/Applications/UrbanTerror/")){
-                QMessageBox::critical(this, "Can't create subfolder in /Applications/", "I can't create the folder \"/Applications/UrbanTerror/\"\n\nIt's probably because the folder already exist or because you do not have the permission to create it."  );
+                QMessageBox::critical(this, "Can't create subfolder in /Applications/", "I can't create the folder \"/Applications/UrbanTerror/\"\n\nIt's probably because the folder already exists or I do not have sufficient permissions to create it."  );
 
                 exit(0);
             }                    

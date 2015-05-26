@@ -176,6 +176,36 @@ void UrTUpdater::init(){
             return;
         }
 
+        // OSX: Staring the updater in /Applications/ will be a mess.
+        // We'll ask the user if he allows us to move in a subdir called UrbanTerror.
+        if (updaterPath == "/Applications/"){
+            msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            msg.setIcon(QMessageBox::Information);
+            msg.setText("You can't run me in the /Applications/ folder. \n\nDo you allow me to create a subfolder called UrbanTerror in /Applications/ and move myself into it ?");
+            result = msg.exec();
+
+            // User don't want us to move. But we don't want to mess inside the /Applications/ folder, so we quit.
+            if(result == QMessageBox::Cancel){
+                exit(0); 
+            }
+
+            if(!QDir().mkdir("/Applications/UrbanTerror/")){
+                QMessageBox::critical(this, "Can't create subfolder in /Applications/", "I can't create the folder \"/Applications/UrbanTerror/\"\n\nIt's probably because the folder already exists or I do not have sufficient permissions to create it."  );
+
+                exit(0);
+            }                    
+            if(!QDir().rename(getBundlePath(), "/Applications/UrbanTerror/UrTUpdater.app")){
+                QMessageBox::critical(this, "Can't move the updater to /Applications/UrbanTerror/", "I failed to move myself into the UrbanTerror subfolder."  );
+                
+                exit(0);
+            }
+
+            // Now we exec the updater from the new location and we can leave, gracefuly
+            QProcess::startDetached("open \"/Applications/UrbanTerror/UrTUpdater.app\"");
+
+            exit(0);
+        }
+
         msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msg.setIcon(QMessageBox::Information);
         msg.setText("The game " URT_GAME_NAME " will be installed in this path:\n\n" + updaterPath + "\n\n"
@@ -224,6 +254,20 @@ QString UrTUpdater::getCurrentPath(){
     // We need to cd ../../..
     if(getPlatform() == "Mac"){
         dir.cdUp();
+        dir.cdUp();
+        dir.cdUp();
+    }
+
+    return dir.absolutePath() + "/";
+}
+
+QString UrTUpdater::getBundlePath(){
+    QDir dir = QDir(QCoreApplication::applicationDirPath());
+
+    // If we're on Mac, 'dir' will contain the path to the executable
+    // inside of the Updater's bundle which isn't what we want.
+    // We need to cd ../..
+    if(getPlatform() == "Mac"){
         dir.cdUp();
         dir.cdUp();
     }

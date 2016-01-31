@@ -170,6 +170,8 @@ void UrTUpdater::init(){
         QMessageBox msg;
         int result;
 
+        firstLaunch = true;
+
         // OSX: do not allow trying to launch the Updater from its .dmg disk image
         if (updaterPath.startsWith("/Volumes/")){
             folderError(updaterPath + URT_GAME_SUBDIR);
@@ -216,8 +218,6 @@ void UrTUpdater::init(){
         if(result == QMessageBox::Cancel){
             quit();
         }
-
-        firstLaunch = true;
     }
 
     parseLocalConfig();

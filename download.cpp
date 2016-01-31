@@ -136,6 +136,7 @@ void Download::downloadFinished(){
         downloadInProgress = false;
 
         currentDownload->close();
+        currentDownload->deleteLater();
 
         // The downloaded file is too small, most likely because of an error page
         // on the server on which we download the file
@@ -165,8 +166,6 @@ void Download::downloadFinished(){
                 process->waitForFinished(10000);
             }
         }
-
-        delete currentDownload;
 
         emit fileDownloaded();
     }

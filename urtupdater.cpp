@@ -1034,6 +1034,7 @@ void UrTUpdater::openAboutPage(){
 void UrTUpdater::openLicencePage(){
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle("Do you accept the terms of this licence?");
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setMinimumWidth(600);
     dialog->setMinimumHeight(500);
 
@@ -1070,6 +1071,7 @@ void UrTUpdater::openChangelogPage(){
     dialog->setWindowTitle("Urban Terror Changelog");
     dialog->setFixedWidth(600);
     dialog->setFixedHeight(500);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
 
     QTextEdit* txt = new QTextEdit(this);
@@ -1088,6 +1090,7 @@ void UrTUpdater::openSettings(){
     }
 
     Settings *settings = new Settings(this);
+    settings->setAttribute(Qt::WA_DeleteOnClose);
 
     connect(settings, SIGNAL(settingsUpdated(int,int,int,int)), this, SLOT(setSettings(int,int,int,int)));
 

@@ -449,7 +449,7 @@ void UrTUpdater::parseManifest(QString data){
                     while(!serverListNode.isNull()){
                         if(serverListNode.nodeName() == "Server"){
                             QDomNode serverNode = serverListNode.firstChild();
-                            int     serverId;
+                            int     serverId = -1;
                             QString serverURL;
                             QString serverName;
                             QString serverLocation;
@@ -487,7 +487,7 @@ void UrTUpdater::parseManifest(QString data){
                     while(!engineListNode.isNull()){
                         if(engineListNode.nodeName() == "Engine"){
                             QDomNode engineNode = engineListNode.firstChild();
-                            int     engineId;
+                            int     engineId = -1;
                             QString engineDir;
                             QString engineName;
                             QString engineLaunchString;
@@ -525,7 +525,7 @@ void UrTUpdater::parseManifest(QString data){
                     while(!versionListNode.isNull()){
                         if(versionListNode.nodeName() == "Version"){
                             QDomNode versionNode = versionListNode.firstChild();
-                            int     versionId;
+                            int     versionId = -1;
                             QString versionName;
                             versionInfo_s vi;
 
@@ -730,7 +730,7 @@ void UrTUpdater::downloadFiles(){
         playAnim->start();
         playButton->setText("Play!");
 
-        dlText->setText("Your game is up to date!");
+        emit requestNewDlLabel("Your game is up to date!");
         return;
     }
 
@@ -745,7 +745,7 @@ void UrTUpdater::downloadFiles(){
             result = msg.exec();
 
             if(result == QMessageBox::Cancel){
-                dlText->setText("Your game is outdated!");
+                emit requestNewDlLabel("Your game is outdated!");
                 loaderAnim->stop();
                 playAnim->start();
                 playButton->setText("Play!");
@@ -782,7 +782,6 @@ void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes, int dl
     globalDlBar->setValue(downloadedBytes);
     dlBar->setValue(nbBytes);
 
-    dlText->setText("Current file: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
     dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
 
     int bytes = downloadedBytes;
@@ -799,6 +798,8 @@ void UrTUpdater::fileDownloaded(){
         currentFile = filesToDownload.takeFirst();
         dlBar->setRange(0, currentFile.fileSize.toInt());
         dlBar->setValue(0);
+
+        emit requestNewDlLabel("Current file: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
 
         emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt(), currentFile.fileUrl);
     }
@@ -1108,8 +1109,10 @@ void UrTUpdater::setSettings(int version, int engine, int server, int updateType
     currentVersion = version;
     downloadServer = server;
     askBeforeUpdating = updateType;
+
     saveLocalConfig();
-    dlText->setText("Checking the game files checksums. It may take a few minutes...");
+
+    emit requestNewDlLabel("Checking the game files checksums. It may take a few minutes...");
     getManifest("versionFiles");
 }
 

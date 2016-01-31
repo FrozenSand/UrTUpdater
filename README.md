@@ -11,7 +11,7 @@ This software is under the LGPL v2.1 licence. See the LICENCE file for more info
 
 Authors: Charles @Barbatos Duprey and Jean-Philippe @holblin Zolesio
 
-Copyright (C) 2013-2015 FrozenSand / 0870760 B.C. Ltd
+Copyright (C) 2013-2016 FrozenSand / 0870760 B.C. Ltd
 
 Feel free to fork this repository and send pull requests. :) 
 

@@ -59,7 +59,7 @@
 #define URT_GAME_NAME           "Urban Terror"
 #define URT_GAME_SUBDIR         "q3ut4"
 #define URT_API_LINK            "http://www.urbanterror.info/api/updaterv4/"
-#define URT_UPDATER_VERSION     "4.0.2"
+#define URT_UPDATER_VERSION     "4.0.3"
 #define URT_UPDATER_CFG         "updater-cfg.xml"
 #define CHANGELOG_EMPTY_TEXT    "Empty."
 

@@ -148,7 +148,7 @@ void Download::downloadFinished(){
         //}
 
         // Apply chmod +x for executable files on linux
-        if((currentFile.contains(".i386", Qt::CaseInsensitive) || (currentFile.contains(".x86_64", Qt::CaseInsensitive))) && (platform == "Linux"))
+        if((currentFile.contains(".i386", Qt::CaseInsensitive) || (currentFile.contains(".x86_64", Qt::CaseInsensitive))) && platform.contains("Linux", Qt::CaseInsensitive))
         {
             QString cmd("chmod +x "+currentFile);
             QProcess* process = new QProcess(this);
@@ -156,7 +156,7 @@ void Download::downloadFinished(){
             process->waitForFinished(3000);
         }
 
-        if((platform == "Linux") || (platform == "Mac"))
+        if(platform.contains("Linux", Qt::CaseInsensitive) || (platform == "Mac"))
         {
             if(currentFile.contains(".zip", Qt::CaseInsensitive))
             {

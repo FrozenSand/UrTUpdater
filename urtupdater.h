@@ -25,6 +25,7 @@
 #define URTUPDATER_H
 
 #include <QMainWindow>
+#include <QCloseEvent>
 #include "common.h"
 #include "download.h"
 #include "settings.h"
@@ -43,7 +44,6 @@ public:
     QNetworkReply *apiAnswer;
 
 public slots:
-    void quit();
     void init();
     void startDlThread();
     void work();
@@ -105,6 +105,8 @@ signals:
 
 private:
     Ui::UrTUpdater *ui;
+
+    void closeEvent(QCloseEvent*);
 
     bool updateInProgress;
     bool readyToProcess;

@@ -28,6 +28,8 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 {
     ui->setupUi(this);
 
+    this->setAttribute(Qt::WA_QuitOnClose);
+
     updaterVersion = URT_UPDATER_VERSION;
     changelog = CHANGELOG_EMPTY_TEXT;
     password = "";
@@ -70,7 +72,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     actionHelp->setShortcut(QKeySequence("Ctrl+H"));
 
     QAction *actionQuitter = menuFile->addAction("&Quit");
-    connect(actionQuitter, SIGNAL(triggered()), this, SLOT(quit()));
+    connect(actionQuitter, SIGNAL(triggered()), this, SLOT(close()));
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
 
     dlText = new QLabel(this);
@@ -216,7 +218,7 @@ void UrTUpdater::init(){
 
         // If we want to quit
         if(result == QMessageBox::Cancel){
-            quit();
+            this->close();
         }
     }
 
@@ -730,7 +732,7 @@ void UrTUpdater::downloadFiles(){
         playAnim->start();
         playButton->setText("Play!");
 
-        emit requestNewDlLabel("Your game is up to date!");
+        updateDlLabel("Your game is up to date!");
         return;
     }
 
@@ -745,7 +747,7 @@ void UrTUpdater::downloadFiles(){
             result = msg.exec();
 
             if(result == QMessageBox::Cancel){
-                emit requestNewDlLabel("Your game is outdated!");
+                updateDlLabel("Your game is outdated!");
                 loaderAnim->stop();
                 playAnim->start();
                 playButton->setText("Play!");
@@ -782,6 +784,8 @@ void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes, int dl
     globalDlBar->setValue(downloadedBytes);
     dlBar->setValue(nbBytes);
 
+    updateDlLabel("Current file: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
+
     dlSpeed->setText("Speed:  " + QString::number(speed, 'f', 2) + " " + QString(unit));
 
     int bytes = downloadedBytes;
@@ -798,8 +802,6 @@ void UrTUpdater::fileDownloaded(){
         currentFile = filesToDownload.takeFirst();
         dlBar->setRange(0, currentFile.fileSize.toInt());
         dlBar->setValue(0);
-
-        emit requestNewDlLabel("Current file: " + currentFile.filePath + currentFile.fileName + " (" + (QString::number(nbFilesDled+1)) + "/" + QString::number(nbFilesToDl) + ")");
 
         emit dlFile(currentFile.filePath, currentFile.fileName, currentFile.fileSize.toInt(), currentFile.fileUrl);
     }
@@ -842,7 +844,7 @@ void UrTUpdater::checkFiles(){
 void UrTUpdater::checkAPIVersion(){
     if(apiVersion != updaterVersion){
         QMessageBox::critical(0, "Updater outdated", "This version ("+updaterVersion+") of the Updater is outdated. Please download the new Updater here: http://get.urbanterror.info");
-        quit();
+        this->close();
     }
 }
 
@@ -981,7 +983,7 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
     if(!error.isEmpty()){
         if(critical == true){
             QMessageBox::critical(0, "Download error", error);
-            quit();
+            this->close();
         }
         else {
             QMessageBox::information(0, "Download error", error);
@@ -1007,12 +1009,12 @@ void UrTUpdater::folderError(QString folder){
                               + "Please move the updater to a folder where it has sufficient permissions.");
     }
 
-    quit();
+    this->close();
 }
 
 void UrTUpdater::apiError(){
     QMessageBox::critical(this, "API error", "The information from the API are missing or wrong. Please report it on www.urbanterror.info and try again later.");
-    quit();
+    this->close();
 }
 
 void UrTUpdater::openHelpPage(){
@@ -1057,7 +1059,7 @@ void UrTUpdater::openLicencePage(){
     rejectButton->show();
 
     connect(acceptButton, SIGNAL(clicked()), dialog, SLOT(close()));
-    connect(rejectButton, SIGNAL(clicked()), this, SLOT(quit()));
+    connect(rejectButton, SIGNAL(clicked()), this, SLOT(close()));
     dialog->exec();
 }
 
@@ -1216,7 +1218,18 @@ int UrTUpdater::getTotalSizeToDl(){
     return size;
 }
 
-void UrTUpdater::quit(){
+void UrTUpdater::closeEvent(QCloseEvent *event)
+{
+    // If an update is in progress, ask the user if he really wants to quit
+    if (updateInProgress) {
+        QMessageBox::StandardButton result = QMessageBox::question(this, "An update is in progress", "An update is in progress. Are you sure that you want to quit?", QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Yes);
+
+        if(result != QMessageBox::Yes){
+            event->ignore();
+            return;
+        }
+    }
+
     if(!firstLaunch){
         saveLocalConfig();
     }
@@ -1225,7 +1238,7 @@ void UrTUpdater::quit(){
         dlThread->deleteLater();
     }
 
-    exit(0);
+    event->accept();
 }
 
 UrTUpdater::~UrTUpdater(){

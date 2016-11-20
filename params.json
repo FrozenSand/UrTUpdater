@@ -1,0 +1,6 @@
+{
+  "name": "Urtupdater",
+  "tagline": "Urban Terror official auto-updater",
+  "body": "UrTUpdater v4\r\n======================\r\n\r\nDescription\r\n-----------\r\n\r\nThis is the official repository for the Urban Terror Auto-Updater software. \r\nCheck it out on http://www.urbanterror.info\r\n\r\nThis software is under the LGPL v2.1 licence. See the LICENCE file for more information.\r\n\r\nAuthors: Charles @Barbatos Duprey and Jean-Philippe @holblin Zolesio\r\n\r\nCopyright (C) 2013-2016 FrozenSand / 0870760 B.C. Ltd\r\n\r\nFeel free to fork this repository and send pull requests. :) \r\n\r\n\r\nCompiling on Windows, Linux and Mac\r\n-----------\r\n\r\nWe recommand you using Qt >= **5.4.1** and Qt GUI >= **3.3.1**. \r\nOpen the **UrTUpdater.pro** file with Qt GUI and configure it to use the compiler that suits your needs. \r\nThe updater was built using the MinGW 4.8 32 bit compiler.\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}

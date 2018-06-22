@@ -135,8 +135,6 @@ void Download::downloadFinished(){
     if(downloadInProgress){
         downloadInProgress = false;
 
-        currentDownload->close();
-        currentDownload->deleteLater();
 
         // The downloaded file is too small, most likely because of an error page
         // on the server on which we download the file
@@ -147,25 +145,23 @@ void Download::downloadFinished(){
         //    return;
         //}
 
-        // Apply chmod +x for executable files on linux
-        if((currentFile.contains(".i386", Qt::CaseInsensitive) || (currentFile.contains(".x86_64", Qt::CaseInsensitive))) && platform.contains("Linux", Qt::CaseInsensitive))
-        {
-            QString cmd("chmod +x "+currentFile);
-            QProcess* process = new QProcess(this);
-            process->start(QFile::encodeName(cmd).data());
-            process->waitForFinished(3000);
-        }
+        currentDownload->close();
 
-        if(platform.contains("Linux", Qt::CaseInsensitive) || (platform == "Mac"))
-        {
-            if(currentFile.contains(".zip", Qt::CaseInsensitive))
-            {
-                QString cmd("unzip -q -o \""+updaterPath+currentFile+"\" -d \""+updaterPath+"\"");
+        if (platform.startsWith("Linux") || platform == "Mac") {
+            // Make binaries executable on linux & macOS
+            if (currentFile.endsWith(".i386", Qt::CaseInsensitive) || currentFile.endsWith(".x86_64", Qt::CaseInsensitive)) {
+                QFile::setPermissions(currentFile, QFile::permissions(currentFile) | QFileDevice::ExeUser | QFileDevice::ExeGroup | QFileDevice::ExeOther);
+            }
+
+            // Unzip .zip files
+            if (currentFile.endsWith(".zip", Qt::CaseInsensitive)) {
                 QProcess* process = new QProcess(this);
-                process->start(QFile::encodeName(cmd).data());
+                process->start("unzip", QStringList() << "-qq" << "-DD" << "-o" << currentDownload->fileName() << "-d" << updaterPath);
                 process->waitForFinished(10000);
             }
         }
+
+        currentDownload->deleteLater();
 
         emit fileDownloaded();
     }

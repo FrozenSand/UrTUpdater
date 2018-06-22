@@ -156,15 +156,16 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 
     connect(playButton, SIGNAL(clicked()), this, SLOT(launchGame()));
     connect(changelogButton, SIGNAL(clicked()), this, SLOT(openChangelogPage()));
-    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
     connect(this, SIGNAL(checkingChanged(int)), this, SLOT(setDLValue(int)));
     connect(this, SIGNAL(requestNewDlLabel(QString)), this, SLOT(updateDlLabel(QString)));
 
-    init();
+    if (!init()) {
+        QTimer::singleShot(0, this, SLOT(close()));
+    }
 }
 
-void UrTUpdater::init(){
-
+bool UrTUpdater::init()
+{
     updaterPath = getCurrentPath();
 
     // Check if this is the first launch of the updater
@@ -177,7 +178,7 @@ void UrTUpdater::init(){
         // OSX: do not allow trying to launch the Updater from its .dmg disk image
         if (updaterPath.startsWith("/Volumes/")){
             folderError(updaterPath + URT_GAME_SUBDIR);
-            return;
+            return false;
         }
 
         // OSX: Staring the updater in /Applications/ will be a mess.
@@ -190,24 +191,23 @@ void UrTUpdater::init(){
 
             // User don't want us to move. But we don't want to mess inside the /Applications/ folder, so we quit.
             if(result == QMessageBox::Cancel){
-                exit(0); 
+                return false;
             }
 
             if(!QDir().mkdir("/Applications/UrbanTerror/")){
                 QMessageBox::critical(this, "Can't create subfolder in /Applications/", "I can't create the folder \"/Applications/UrbanTerror/\"\n\nIt's probably because the folder already exists or I do not have sufficient permissions to create it."  );
 
-                exit(0);
-            }                    
-            if(!QDir().rename(getBundlePath(), "/Applications/UrbanTerror/UrTUpdater.app")){
+                return false;
+            }
+
+            if(!QDir().rename(getBundlePath(), "/Applications/UrbanTerror/UrTUpdater.app")) {
                 QMessageBox::critical(this, "Can't move the updater to /Applications/UrbanTerror/", "I failed to move myself into the UrbanTerror subfolder."  );
-                
-                exit(0);
+                return false;
             }
 
             // Now we exec the updater from the new location and we can leave, gracefuly
-            QProcess::startDetached("open \"/Applications/UrbanTerror/UrTUpdater.app\"");
-
-            exit(0);
+            QProcess::startDetached("open", QStringList("/Applications/UrbanTerror/UrTUpdater.app"));
+            return false;
         }
 
         msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
@@ -217,13 +217,15 @@ void UrTUpdater::init(){
         result = msg.exec();
 
         // If we want to quit
-        if(result == QMessageBox::Cancel){
-            this->close();
+        if (result == QMessageBox::Cancel) {
+            return false;
         }
     }
 
     parseLocalConfig();
     getManifest("versionInfo");
+
+    return true;
 }
 
 QString UrTUpdater::getPlatform()
@@ -1125,20 +1127,17 @@ void UrTUpdater::launchGame(){
     QProcess process;
     QString launchString = getEngineLaunchStringById(gameEngine);
     QString platform = getPlatform();
-    QString s;
 
-    if(updateInProgress){
+    if (updateInProgress) {
         return;
     }
 
-    if(platform == "Mac"){
-        s = "open \"" + updaterPath + launchString + "\"";
-    }
-    else {
-        s = updaterPath + launchString;
+    if (platform == "Mac") {
+        process.startDetached("open", QStringList(updaterPath + launchString));
+    } else {
+        process.startDetached(updaterPath + launchString);
     }
 
-    process.startDetached( s );
     process.waitForStarted();
 }
 
@@ -1234,7 +1233,9 @@ void UrTUpdater::closeEvent(QCloseEvent *event)
         saveLocalConfig();
     }
 
-    if(threadStarted){
+    if(threadStarted)
+    {
+        dlThread->quit();
         dlThread->deleteLater();
     }
 

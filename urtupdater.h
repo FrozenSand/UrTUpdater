@@ -44,7 +44,7 @@ public:
     QNetworkReply *apiAnswer;
 
 public slots:
-    void init();
+    bool init();
     void startDlThread();
     void work();
 

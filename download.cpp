@@ -24,14 +24,12 @@
 #include "download.h"
 
 Download::Download(QString server, QString _updaterPath, QString _platform) :
-    errorDl(false), updaterPath(_updaterPath), downloadServer(server), platform(_platform){
+    errorDl(false), updaterPath(_updaterPath), downloadServer(server), platform(_platform)
+{
 }
 
-Download::~Download(){
-
-}
-
-void Download::init(){
+void Download::init()
+{
     downloadInProgress = false;
     downloadedBytes = 0;
     fileSize = 0;
@@ -43,7 +41,8 @@ void Download::init(){
     connect(timeout, SIGNAL(timeout()), this, SLOT(reconnect()));
 }
 
-void Download::reconnect(){
+void Download::reconnect()
+{
     disconnect(timeout, SIGNAL(timeout()), this, SLOT(reconnect()));
     http->deleteLater();
 
@@ -52,13 +51,15 @@ void Download::reconnect(){
     emit downloadFile(currentFolder, currentFile, fileSize, fileUrl);
 }
 
-void Download::setDownloadServer(QString server){
+void Download::setDownloadServer(QString server)
+{
     downloadServer = server;
 }
 
-void Download::downloadFile(QString folder, QString file, int size, QString url){
+void Download::downloadFile(QString folder, QString file, int size, QString url)
+{
 
-    if(errorDl){
+    if (errorDl) {
         return;
     }
 
@@ -72,19 +73,19 @@ void Download::downloadFile(QString folder, QString file, int size, QString url)
     request = QNetworkRequest(QString(url));
 
     // Check if we have to create the folder
-    if(!currentFolder.isEmpty() && !QDir().exists(updaterPath + currentFolder)){
-        if(!QDir().mkdir(updaterPath + currentFolder)){
+    if (!currentFolder.isEmpty() && !QDir().exists(updaterPath + currentFolder)) {
+        if (!QDir().mkdir(updaterPath + currentFolder)) {
             emit folderError(QString(updaterPath + currentFolder));
         }
     }
 
     // If the file already exists, remove it
-    if(currentDownload->exists()){
+    if (currentDownload->exists()) {
         currentDownload->remove();
     }
 
     // Open the file in write mode
-    if(!currentDownload->open(QIODevice::ReadWrite)){
+    if (!currentDownload->open(QIODevice::ReadWrite)) {
         emit folderError(QString(folder + file));
     }
 
@@ -100,14 +101,15 @@ void Download::downloadFile(QString folder, QString file, int size, QString url)
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
 }
 
-void Download::filePart(){
+void Download::filePart()
+{
     QString unit;
     qint64 speed;
 
     int count = currentDownload->write(reply->readAll());
     downloadedBytes += count;
 
-    if (downloadedBytes == 0){
+    if (downloadedBytes == 0) {
         emit bytesDownloaded(0, "B/s", 0, 0);
         return;
     }
@@ -127,12 +129,13 @@ void Download::filePart(){
     emit bytesDownloaded(speed, unit, downloadedBytes, count);
 }
 
-void Download::downloadFinished(){
+void Download::downloadFinished()
+{
     disconnect(reply, SIGNAL(readyRead()), this, SLOT(filePart()));
     disconnect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     reply->deleteLater();
 
-    if(downloadInProgress){
+    if (downloadInProgress) {
         downloadInProgress = false;
 
 
@@ -167,7 +170,8 @@ void Download::downloadFinished(){
     }
 }
 
-void Download::downloadError(QNetworkReply::NetworkError code){
+void Download::downloadError(QNetworkReply::NetworkError code)
+{
     errorDl = true;
     emit dlError(code);
 }

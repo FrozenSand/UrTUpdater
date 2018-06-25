@@ -237,17 +237,28 @@ function checkVersion ()
 
 function doBrowser ()
 {
-    TMPFILE=`tempfile -d "$CWD" -p tmp -s .html`
-
-    echo "$1" > "$TMPFILE"
-
-    if [ -z "$BROWSER" ]; then
-        cat "$TMPFILE"
-    else
-        $BROWSER "$TMPFILE"
+    TMPFILE=""
+    if which tempfile >/dev/null 2>&1 ; then
+        TMPFILE=`tempfile -d "$CWD" -p tmp -s .html`
+    elif which mktemp >/dev/null 2>&1 ; then
+        TMPFILE=`mktemp -p "$CWD" tmpXXXXXX`
+        mv -f "$TMPFILE" "${TMPFILE}.html"
+        TMPFILE="${TMPFILE}.html"
     fi
 
-    rm -f "$TMPFILE"
+    if [ -z "$TMPFILE" ]; then
+        echo "$1"
+    else
+        echo "$1" > "$TMPFILE"
+
+        if [ -z "$BROWSER" ]; then
+            cat "$TMPFILE"
+        else
+            $BROWSER "$TMPFILE"
+        fi
+
+        rm -f "$TMPFILE"
+    fi
 }
 
 function drawLicence ()

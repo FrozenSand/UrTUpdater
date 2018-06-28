@@ -622,7 +622,22 @@ void UrTUpdater::parseManifest(QString data)
 
                             // Check the file's md5sum to see if it needs to be updated.
                             else if (!fileName.isEmpty() && !fileMd5.isEmpty()) {
-                                if (getMd5Sum(f) != fileMd5) {
+                                QString hashResult;
+
+                                if (f->open(QIODevice::ReadOnly))
+                                {
+                                    QCryptographicHash hash(QCryptographicHash::Md5);
+
+                                    while (!f->atEnd()) {
+                                        hash.addData(f->read(4096));
+                                        emit checkingChanged((i * 100 + (100 * f->pos() / f->size())) / l, statusText);
+                                    }
+
+                                    f->close();
+                                    hashResult = hash.result().toHex();
+                                }
+
+                                if (hashResult != fileMd5) {
                                     mustDownload = true;
                                 }
                             }
@@ -1183,20 +1198,6 @@ void UrTUpdater::setLoadingIcon(int)
 void UrTUpdater::setPlayIcon(int)
 {
     playButton->setIcon(QIcon(playAnim->currentPixmap()));
-}
-
-QString UrTUpdater::getMd5Sum(QFile* file)
-{
-    if (file->exists() && file->open(QIODevice::ReadOnly))
-    {
-        QByteArray content = file->readAll();
-        QByteArray hashed = QCryptographicHash::hash(content, QCryptographicHash::Md5);
-        file->close();
-
-        return hashed.toHex().data();
-    }
-
-    return "";
 }
 
 QString UrTUpdater::getServerUrlById(int id)

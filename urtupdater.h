@@ -61,7 +61,6 @@ public slots:
 
     QString getServerUrlById(int);
     QString getEngineLaunchStringById(int id);
-    QString getMd5Sum(QFile* file);
     QString getSize(int *bytes);
     int getTotalSizeToDl();
 

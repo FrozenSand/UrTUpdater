@@ -156,7 +156,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 
     connect(playButton, SIGNAL(clicked()), this, SLOT(launchGame()));
     connect(changelogButton, SIGNAL(clicked()), this, SLOT(openChangelogPage()));
-    connect(this, SIGNAL(checkingChanged(int)), this, SLOT(setDLValue(int)));
+    connect(this, SIGNAL(checkingChanged(int, QString)), this, SLOT(updateCheckStatus(int, QString)));
     connect(this, SIGNAL(requestNewDlLabel(QString)), this, SLOT(updateDlLabel(QString)));
 
     if (!init()) {
@@ -560,7 +560,7 @@ void UrTUpdater::parseManifest(QString data)
                 }
 
                 else if (updater.toElement().nodeName() == "Files") {
-                    emit checkingChanged(0);
+                    emit checkingChanged(0, "");
                     QDomNode files = updater.firstChild();
 
                     emit requestNewDlLabel("Checking the game files checksums. It may take a few minutes...");
@@ -603,8 +603,9 @@ void UrTUpdater::parseManifest(QString data)
 
                             i++;
 
-                            currentChecksum->setText(QString("Checking %1 (%2 of %3)").arg(fileName).arg(i).arg(l));
-                            emit checkingChanged(i * 100.0 / l);
+                            QString statusText = QString("Checking %1 (%2 of %3)").arg(fileName).arg(i).arg(l);
+
+                            emit checkingChanged(i * 100.0 / l, statusText);
 
                             // If the file does not exist, it must be downloaded.
                             if (!f->exists()) {
@@ -644,7 +645,7 @@ void UrTUpdater::parseManifest(QString data)
                         files = files.nextSibling();
                     }
 
-                    currentChecksum->setText("");
+                    emit checkingChanged(100, "");
                 }
                 updater = updater.nextSibling();
             }
@@ -698,9 +699,11 @@ void UrTUpdater::work()
     }
 }
 
-void UrTUpdater::setDLValue(int v)
+void UrTUpdater::updateCheckStatus(int progress, QString status)
 {
-    dlBar->setValue(v);
+
+    currentChecksum->setText(status);
+    dlBar->setValue(progress);
 }
 
 void UrTUpdater::setDLValueP(qint64 r, qint64 t)

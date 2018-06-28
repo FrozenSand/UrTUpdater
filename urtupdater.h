@@ -48,7 +48,7 @@ public slots:
     void startDlThread();
     void work();
 
-    void setDLValue(int v);
+    void updateCheckStatus(int progress, QString status);
     void setDLValueP(qint64 r, qint64 t);
 
     QString getPlatform();
@@ -100,7 +100,7 @@ public slots:
 
 signals:
     void dlFile(QString, QString, int, QString);
-    void checkingChanged(int percent);
+    void checkingChanged(int percent, QString status);
     void requestNewDlLabel(QString);
 
 private:

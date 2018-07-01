@@ -237,7 +237,7 @@ function checkVersion ()
 
 function doBrowser ()
 {
-    TMPFILE=`tempfile -d "$CWD" -p tmp -s .html`
+    TMPFILE=`mktemp -p "$CWD" --suffix .html`
 
     echo "$1" > "$TMPFILE"
 

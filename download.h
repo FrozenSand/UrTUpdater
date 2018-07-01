@@ -32,7 +32,6 @@ class Download : public QObject
 
 public:
     Download(QString, QString, QString);
-    ~Download();
     void setDownloadServer(QString);
     bool errorDl;
 

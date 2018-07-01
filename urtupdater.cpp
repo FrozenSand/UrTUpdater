@@ -46,9 +46,9 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     firstLaunch = false;
 
     QStringList arguments = QCoreApplication::arguments();
-    if(arguments.count() >= 1) {
-        for(int i = 0; i < arguments.count(); i++) {
-            if(arguments.at(i) == "--password" && (i + 1 < arguments.count()) ) {
+    if (arguments.count() >= 1) {
+        for (int i = 0; i < arguments.count(); i++) {
+            if (arguments.at(i) == "--password" && (i + 1 < arguments.count()) ) {
                 i++;
                 password = arguments.at( i );
             }
@@ -120,7 +120,7 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
     globalDlBar->setFixedHeight(20);
     globalDlBar->hide();
 
-    if(!menuBar()->isNativeMenuBar()){
+    if (!menuBar()->isNativeMenuBar()) {
         dlBar->setFixedWidth(485);
         globalDlBar->setFixedWidth(485);
     }
@@ -156,58 +156,58 @@ UrTUpdater::UrTUpdater(QWidget *parent) : QMainWindow(parent), ui(new Ui::UrTUpd
 
     connect(playButton, SIGNAL(clicked()), this, SLOT(launchGame()));
     connect(changelogButton, SIGNAL(clicked()), this, SLOT(openChangelogPage()));
-    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quit()));
-    connect(this, SIGNAL(checkingChanged(int)), this, SLOT(setDLValue(int)));
+    connect(this, SIGNAL(checkingChanged(int, QString)), this, SLOT(updateCheckStatus(int, QString)));
     connect(this, SIGNAL(requestNewDlLabel(QString)), this, SLOT(updateDlLabel(QString)));
 
-    init();
+    if (!init()) {
+        QTimer::singleShot(0, this, SLOT(close()));
+    }
 }
 
-void UrTUpdater::init(){
-
+bool UrTUpdater::init()
+{
     updaterPath = getCurrentPath();
 
     // Check if this is the first launch of the updater
-    if(!QFile::exists(updaterPath + URT_GAME_SUBDIR)){
+    if (!QFile::exists(updaterPath + URT_GAME_SUBDIR)) {
         QMessageBox msg;
         int result;
 
         firstLaunch = true;
 
         // OSX: do not allow trying to launch the Updater from its .dmg disk image
-        if (updaterPath.startsWith("/Volumes/")){
+        if (updaterPath.startsWith("/Volumes/")) {
             folderError(updaterPath + URT_GAME_SUBDIR);
-            return;
+            return false;
         }
 
         // OSX: Staring the updater in /Applications/ will be a mess.
         // We'll ask the user if he allows us to move in a subdir called UrbanTerror.
-        if (updaterPath == "/Applications/"){
+        if (updaterPath == "/Applications/") {
             msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             msg.setIcon(QMessageBox::Information);
             msg.setText("You can't run me in the /Applications/ folder. \n\nDo you allow me to create a subfolder called UrbanTerror in /Applications/ and move myself into it ?");
             result = msg.exec();
 
             // User don't want us to move. But we don't want to mess inside the /Applications/ folder, so we quit.
-            if(result == QMessageBox::Cancel){
-                exit(0); 
+            if (result == QMessageBox::Cancel) {
+                return false;
             }
 
-            if(!QDir().mkdir("/Applications/UrbanTerror/")){
+            if (!QDir().mkdir("/Applications/UrbanTerror/")) {
                 QMessageBox::critical(this, "Can't create subfolder in /Applications/", "I can't create the folder \"/Applications/UrbanTerror/\"\n\nIt's probably because the folder already exists or I do not have sufficient permissions to create it."  );
 
-                exit(0);
-            }                    
-            if(!QDir().rename(getBundlePath(), "/Applications/UrbanTerror/UrTUpdater.app")){
+                return false;
+            }
+
+            if (!QDir().rename(getBundlePath(), "/Applications/UrbanTerror/UrTUpdater.app")) {
                 QMessageBox::critical(this, "Can't move the updater to /Applications/UrbanTerror/", "I failed to move myself into the UrbanTerror subfolder."  );
-                
-                exit(0);
+                return false;
             }
 
             // Now we exec the updater from the new location and we can leave, gracefuly
-            QProcess::startDetached("open \"/Applications/UrbanTerror/UrTUpdater.app\"");
-
-            exit(0);
+            QProcess::startDetached("open", QStringList("/Applications/UrbanTerror/UrTUpdater.app"));
+            return false;
         }
 
         msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
@@ -217,13 +217,15 @@ void UrTUpdater::init(){
         result = msg.exec();
 
         // If we want to quit
-        if(result == QMessageBox::Cancel){
-            this->close();
+        if (result == QMessageBox::Cancel) {
+            return false;
         }
     }
 
     parseLocalConfig();
     getManifest("versionInfo");
+
+    return true;
 }
 
 QString UrTUpdater::getPlatform()
@@ -233,7 +235,7 @@ QString UrTUpdater::getPlatform()
     #endif
 
     #ifdef Q_OS_LINUX
-    if(QSysInfo::WordSize == 64){
+    if (QSysInfo::WordSize == 64) {
         return "Linux64";
     }
     else {
@@ -248,13 +250,14 @@ QString UrTUpdater::getPlatform()
     return "Linux32";
 }
 
-QString UrTUpdater::getCurrentPath(){
+QString UrTUpdater::getCurrentPath()
+{
     QDir dir = QDir(QCoreApplication::applicationDirPath());
 
     // If we're on Mac, 'dir' will contain the path to the executable
     // inside of the Updater's bundle which isn't what we want.
     // We need to cd ../../..
-    if(getPlatform() == "Mac"){
+    if (getPlatform() == "Mac") {
         dir.cdUp();
         dir.cdUp();
         dir.cdUp();
@@ -263,13 +266,14 @@ QString UrTUpdater::getCurrentPath(){
     return dir.absolutePath() + "/";
 }
 
-QString UrTUpdater::getBundlePath(){
+QString UrTUpdater::getBundlePath()
+{
     QDir dir = QDir(QCoreApplication::applicationDirPath());
 
     // If we're on Mac, 'dir' will contain the path to the executable
     // inside of the Updater's bundle which isn't what we want.
     // We need to cd ../..
-    if(getPlatform() == "Mac"){
+    if (getPlatform() == "Mac") {
         dir.cdUp();
         dir.cdUp();
     }
@@ -277,11 +281,12 @@ QString UrTUpdater::getBundlePath(){
     return dir.absolutePath() + "/";
 }
 
-void UrTUpdater::parseLocalConfig(){
+void UrTUpdater::parseLocalConfig()
+{
     QDomDocument *dom = new QDomDocument();
     QFile *f = new QFile(updaterPath + URT_UPDATER_CFG);
 
-    if(!f->open(QFile::ReadOnly)){
+    if (!f->open(QFile::ReadOnly)) {
         delete f;
         configFileExists = false;
         return;
@@ -290,21 +295,21 @@ void UrTUpdater::parseLocalConfig(){
     dom->setContent(f);
 
     QDomNode node = dom->firstChild();
-    while(!node.isNull()){
-        if(node.toElement().nodeName() == "UpdaterConfig"){
+    while (!node.isNull()) {
+        if (node.toElement().nodeName() == "UpdaterConfig") {
             QDomNode conf = node.firstChild();
 
-            while(!conf.isNull()){
-                if(conf.toElement().nodeName() == "DownloadServer"){
+            while (!conf.isNull()) {
+                if (conf.toElement().nodeName() == "DownloadServer") {
                     downloadServer = conf.toElement().text().toInt();
                 }
-                if(conf.toElement().nodeName() == "GameEngine"){
+                if (conf.toElement().nodeName() == "GameEngine") {
                     gameEngine = conf.toElement().text().toInt();
                 }
-                if(conf.toElement().nodeName() == "CurrentVersion"){
+                if (conf.toElement().nodeName() == "CurrentVersion") {
                     currentVersion = conf.toElement().text().toInt();
                 }
-                if(conf.toElement().nodeName() == "AskBeforeUpdating"){
+                if (conf.toElement().nodeName() == "AskBeforeUpdating") {
                     askBeforeUpdating = conf.toElement().text().toInt();
                 }
                 conf = conf.nextSibling();
@@ -321,11 +326,12 @@ void UrTUpdater::parseLocalConfig(){
     delete dom;
 }
 
-void UrTUpdater::saveLocalConfig(){
+void UrTUpdater::saveLocalConfig()
+{
     QFile *f = new QFile(updaterPath + URT_UPDATER_CFG);
     QXmlStreamWriter *xml = new QXmlStreamWriter();
 
-    if(!f->open(QFile::WriteOnly)){
+    if (!f->open(QFile::WriteOnly)) {
         QMessageBox::critical(0, "Could not write the config file", "Could not write the Updater config file inside of the game folder. Your updater preferences won't be saved.");
         delete f;
         return;
@@ -362,7 +368,8 @@ void UrTUpdater::saveLocalConfig(){
     delete xml;
 }
 
-void UrTUpdater::getManifest(QString query){
+void UrTUpdater::getManifest(QString query)
+{
     QUrl APIUrl(URT_API_LINK);
     QUrlQuery url;
     QNetworkRequest apiRequest(APIUrl);
@@ -385,7 +392,8 @@ void UrTUpdater::getManifest(QString query){
     connect(apiAnswer, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
 }
 
-void UrTUpdater::parseAPIAnswer(){
+void UrTUpdater::parseAPIAnswer()
+{
     QByteArray  apiByteAnswer = apiAnswer->readAll();
     QString     apiData = QString(apiByteAnswer);
 
@@ -397,11 +405,13 @@ void UrTUpdater::parseAPIAnswer(){
     watcher->setFuture(parser);
 }
 
-void UrTUpdater::updateDlLabel(QString label){
+void UrTUpdater::updateDlLabel(QString label)
+{
     dlText->setText(label);
 }
 
-void UrTUpdater::parseManifest(QString data){
+void UrTUpdater::parseManifest(QString data)
+{
     QDomDocument* dom = new QDomDocument();
     dom->setContent(data);
 
@@ -416,40 +426,40 @@ void UrTUpdater::parseManifest(QString data){
 
     emit requestNewDlLabel("Parsing the answer of the API...");
 
-    while(!node.isNull()){
-        if(node.toElement().nodeName() == "Updater"){
+    while (!node.isNull()) {
+        if (node.toElement().nodeName() == "Updater") {
             QDomNode updater = node.firstChild();
 
-            while(!updater.isNull()){
+            while (!updater.isNull()) {
 
-                if(updater.toElement().nodeName() == "APIVersion"){
+                if (updater.toElement().nodeName() == "APIVersion") {
                     apiVersion = updater.toElement().text();
                 }
 
-                if(updater.toElement().nodeName() == "Changelog"){
+                if (updater.toElement().nodeName() == "Changelog") {
                     changelog = updater.toElement().text();
                 }
 
-                if(updater.toElement().nodeName() == "Licence"){
+                if (updater.toElement().nodeName() == "Licence") {
                     licenceText = updater.toElement().text();
                 }
 
-                if(updater.toElement().nodeName() == "NewsList"){
+                if (updater.toElement().nodeName() == "NewsList") {
                     QDomNode newsListNode = updater.firstChild();
 
-                    while(!newsListNode.isNull()){
-                        if(newsListNode.nodeName() == "NewsText"){
+                    while (!newsListNode.isNull()) {
+                        if (newsListNode.nodeName() == "NewsText") {
                             newsList.append(newsListNode.toElement().text());
                         }
                         newsListNode = newsListNode.nextSibling();
                     }
                 }
 
-                else if(updater.toElement().nodeName() == "ServerList"){
+                else if (updater.toElement().nodeName() == "ServerList") {
                     QDomNode serverListNode = updater.firstChild();
 
-                    while(!serverListNode.isNull()){
-                        if(serverListNode.nodeName() == "Server"){
+                    while (!serverListNode.isNull()) {
+                        if (serverListNode.nodeName() == "Server") {
                             QDomNode serverNode = serverListNode.firstChild();
                             int     serverId = -1;
                             QString serverURL;
@@ -457,17 +467,17 @@ void UrTUpdater::parseManifest(QString data){
                             QString serverLocation;
                             serverInfo_s si;
 
-                            while(!serverNode.isNull()){
-                                if(serverNode.nodeName() == "ServerName"){
+                            while (!serverNode.isNull()) {
+                                if (serverNode.nodeName() == "ServerName") {
                                     serverName = serverNode.toElement().text();
                                 }
-                                if(serverNode.nodeName() == "ServerURL"){
+                                if (serverNode.nodeName() == "ServerURL") {
                                     serverURL = serverNode.toElement().text();
                                 }
-                                if(serverNode.nodeName() == "ServerLocation"){
+                                if (serverNode.nodeName() == "ServerLocation") {
                                     serverLocation = serverNode.toElement().text();
                                 }
-                                if(serverNode.nodeName() == "ServerId"){
+                                if (serverNode.nodeName() == "ServerId") {
                                     serverId = serverNode.toElement().text().toInt();
                                 }
                                 serverNode = serverNode.nextSibling();
@@ -483,11 +493,11 @@ void UrTUpdater::parseManifest(QString data){
                     }
                 }
 
-                else if(updater.toElement().nodeName() == "EngineList"){
+                else if (updater.toElement().nodeName() == "EngineList") {
                     QDomNode engineListNode = updater.firstChild();
 
-                    while(!engineListNode.isNull()){
-                        if(engineListNode.nodeName() == "Engine"){
+                    while (!engineListNode.isNull()) {
+                        if (engineListNode.nodeName() == "Engine") {
                             QDomNode engineNode = engineListNode.firstChild();
                             int     engineId = -1;
                             QString engineDir;
@@ -495,17 +505,17 @@ void UrTUpdater::parseManifest(QString data){
                             QString engineLaunchString;
                             engineInfo_s ei;
 
-                            while(!engineNode.isNull()){
-                                if(engineNode.nodeName() == "EngineName"){
+                            while (!engineNode.isNull()) {
+                                if (engineNode.nodeName() == "EngineName") {
                                     engineName = engineNode.toElement().text();
                                 }
-                                if(engineNode.nodeName() == "EngineDir"){
+                                if (engineNode.nodeName() == "EngineDir") {
                                     engineDir = engineNode.toElement().text();
                                 }
-                                if(engineNode.nodeName() == "EngineId"){
+                                if (engineNode.nodeName() == "EngineId") {
                                     engineId = engineNode.toElement().text().toInt();
                                 }
-                                if(engineNode.nodeName() == "EngineLaunchString"){
+                                if (engineNode.nodeName() == "EngineLaunchString") {
                                     engineLaunchString = engineNode.toElement().text();
                                 }
                                 engineNode = engineNode.nextSibling();
@@ -521,21 +531,21 @@ void UrTUpdater::parseManifest(QString data){
                     }
                 }
 
-                else if(updater.toElement().nodeName() == "VersionList"){
+                else if (updater.toElement().nodeName() == "VersionList") {
                     QDomNode versionListNode = updater.firstChild();
 
-                    while(!versionListNode.isNull()){
-                        if(versionListNode.nodeName() == "Version"){
+                    while (!versionListNode.isNull()) {
+                        if (versionListNode.nodeName() == "Version") {
                             QDomNode versionNode = versionListNode.firstChild();
                             int     versionId = -1;
                             QString versionName;
                             versionInfo_s vi;
 
-                            while(!versionNode.isNull()){
-                                if(versionNode.nodeName() == "VersionName"){
+                            while (!versionNode.isNull()) {
+                                if (versionNode.nodeName() == "VersionName") {
                                     versionName = versionNode.toElement().text();
                                 }
-                                if(versionNode.nodeName() == "VersionNumber"){
+                                if (versionNode.nodeName() == "VersionNumber") {
                                     versionId = versionNode.toElement().text().toInt();
                                 }
                                 versionNode = versionNode.nextSibling();
@@ -549,8 +559,8 @@ void UrTUpdater::parseManifest(QString data){
                     }
                 }
 
-                else if(updater.toElement().nodeName() == "Files"){
-                    emit checkingChanged(0);
+                else if (updater.toElement().nodeName() == "Files") {
+                    emit checkingChanged(0, "");
                     QDomNode files = updater.firstChild();
 
                     emit requestNewDlLabel("Checking the game files checksums. It may take a few minutes...");
@@ -559,8 +569,8 @@ void UrTUpdater::parseManifest(QString data){
 
                     l = updater.childNodes().length();
 
-                    while(!files.isNull()){
-                        if(files.nodeName() == "File"){
+                    while (!files.isNull()) {
+                        if (files.nodeName() == "File") {
                             QDomNode fileInfo = files.firstChild();
                             QString fileDir;
                             QString fileName;
@@ -569,20 +579,20 @@ void UrTUpdater::parseManifest(QString data){
                             QString fileUrl;
                             bool mustDownload = false;
 
-                            while(!fileInfo.isNull()){
-                                if(fileInfo.nodeName() == "FileDir"){
+                            while (!fileInfo.isNull()) {
+                                if (fileInfo.nodeName() == "FileDir") {
                                     fileDir = fileInfo.toElement().text();
                                 }
-                                if(fileInfo.nodeName() == "FileName"){
+                                if (fileInfo.nodeName() == "FileName") {
                                     fileName = fileInfo.toElement().text();
                                 }
-                                if(fileInfo.nodeName() == "FileMD5"){
+                                if (fileInfo.nodeName() == "FileMD5") {
                                     fileMd5 = fileInfo.toElement().text();
                                 }
-                                if(fileInfo.nodeName() == "FileSize"){
+                                if (fileInfo.nodeName() == "FileSize") {
                                     fileSize = fileInfo.toElement().text();
                                 }
-                                if(fileInfo.nodeName() == "FileUrl"){
+                                if (fileInfo.nodeName() == "FileUrl") {
                                     fileUrl = fileInfo.toElement().text();
                                 }
                                 fileInfo = fileInfo.nextSibling();
@@ -593,33 +603,49 @@ void UrTUpdater::parseManifest(QString data){
 
                             i++;
 
-                            currentChecksum->setText(QString("Checking %1 (%2 of %3)").arg(fileName).arg(i).arg(l));
-                            emit checkingChanged(i * 100.0 / l);
+                            QString statusText = QString("Checking %1 (%2 of %3)").arg(fileName).arg(i).arg(l);
+
+                            emit checkingChanged(i * 100.0 / l, statusText);
 
                             // If the file does not exist, it must be downloaded.
-                            if(!f->exists()){
-                                if(!fileMd5.isEmpty()){
+                            if (!f->exists()) {
+                                if (!fileMd5.isEmpty()) {
                                     mustDownload = true;
                                 }
                             }
 
                             // If the md5 string is empty, it means that the API wants
                             // us to delete this file if needed
-                            else if(!fileName.isEmpty() && fileMd5.isEmpty()){
+                            else if (!fileName.isEmpty() && fileMd5.isEmpty()) {
                                 QFile::remove(filePath);
                             }
 
                             // Check the file's md5sum to see if it needs to be updated.
-                            else if(!fileName.isEmpty() && !fileMd5.isEmpty()){
-                                if(getMd5Sum(f) != fileMd5){
+                            else if (!fileName.isEmpty() && !fileMd5.isEmpty()) {
+                                QString hashResult;
+
+                                if (f->open(QIODevice::ReadOnly))
+                                {
+                                    QCryptographicHash hash(QCryptographicHash::Md5);
+
+                                    while (!f->atEnd()) {
+                                        hash.addData(f->read(4096));
+                                        emit checkingChanged((i * 100 + (100 * f->pos() / f->size())) / l, statusText);
+                                    }
+
+                                    f->close();
+                                    hashResult = hash.result().toHex();
+                                }
+
+                                if (hashResult != fileMd5) {
                                     mustDownload = true;
                                 }
                             }
-                            if (!fileMd5.isEmpty() && !fileName.isEmpty()){
+                            if (!fileMd5.isEmpty() && !fileName.isEmpty()) {
                                 packsList.append(fileName);
                             }
 
-                            if(mustDownload){
+                            if (mustDownload) {
                                 fileInfo_s fi;
                                 fi.fileName = fileName;
                                 fi.filePath = fileDir;
@@ -634,7 +660,7 @@ void UrTUpdater::parseManifest(QString data){
                         files = files.nextSibling();
                     }
 
-                    currentChecksum->setText("");
+                    emit checkingChanged(100, "");
                 }
                 updater = updater.nextSibling();
             }
@@ -645,12 +671,13 @@ void UrTUpdater::parseManifest(QString data){
     delete dom;
 }
 
-void UrTUpdater::work(){
+void UrTUpdater::work()
+{
     currentChecksum->hide();
 
     // Workaround - you can't call ->show() from parseManifest()
     // because this function is running on its own thread.
-    if (changelog != CHANGELOG_EMPTY_TEXT){
+    if (changelog != CHANGELOG_EMPTY_TEXT) {
         changelogButton->show();
     }
 
@@ -660,20 +687,20 @@ void UrTUpdater::work(){
     checkVersion();
     drawNews();
 
-    if(!threadStarted){
+    if (!threadStarted) {
         startDlThread();
     }
 
-    if(readyToProcess){
+    if (readyToProcess) {
         checkFiles();
         downloadFiles();
     }
     else {
-        if(firstLaunch){
+        if (firstLaunch) {
             openLicencePage();
 
             // Create the game folder
-            if(!QDir().mkdir(updaterPath + URT_GAME_SUBDIR)){
+            if (!QDir().mkdir(updaterPath + URT_GAME_SUBDIR)) {
                 folderError(QString(updaterPath + URT_GAME_SUBDIR));
             }
 
@@ -687,16 +714,21 @@ void UrTUpdater::work(){
     }
 }
 
-void UrTUpdater::setDLValue(int v){
-    dlBar->setValue(v);
+void UrTUpdater::updateCheckStatus(int progress, QString status)
+{
+
+    currentChecksum->setText(status);
+    dlBar->setValue(progress);
 }
 
-void UrTUpdater::setDLValueP(qint64 r, qint64 t){
+void UrTUpdater::setDLValueP(qint64 r, qint64 t)
+{
     dlBar->setValue(r * 100.0 / t);
 }
 
-void UrTUpdater::startDlThread(){
-    if(threadStarted){
+void UrTUpdater::startDlThread()
+{
+    if (threadStarted) {
         return;
     }
 
@@ -718,9 +750,10 @@ void UrTUpdater::startDlThread(){
     dlThread->start();
 }
 
-void UrTUpdater::downloadFiles(){
+void UrTUpdater::downloadFiles()
+{
 
-    if(filesToDownload.size() <= 0){
+    if (filesToDownload.size() <= 0) {
         dlBar->setRange(0, 100);
         dlBar->setValue(100);
         globalDlBar->hide();
@@ -737,7 +770,7 @@ void UrTUpdater::downloadFiles(){
     }
 
     else {
-        if(askBeforeUpdating == 1){
+        if (askBeforeUpdating == 1) {
             QMessageBox msg;
             int result;
 
@@ -746,7 +779,7 @@ void UrTUpdater::downloadFiles(){
             msg.setText("A new update is available. Would you like to download it now?");
             result = msg.exec();
 
-            if(result == QMessageBox::Cancel){
+            if (result == QMessageBox::Cancel) {
                 updateDlLabel("Your game is outdated!");
                 loaderAnim->stop();
                 playAnim->start();
@@ -774,7 +807,8 @@ void UrTUpdater::downloadFiles(){
     }
 }
 
-void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes, int dled){
+void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes, int dled)
+{
     QString nb;
     QString nb2;
     int totalSize = totalSizeToDl;
@@ -796,8 +830,9 @@ void UrTUpdater::bytesDownloaded(qint64 speed, QString unit, int nbBytes, int dl
     dlSize->setText(QString::number(bytes) + nb + "/ " + QString::number(totalSize) + nb2); // / " + QString::number(currentFile.fileSize)/1000 + " kB"
 }
 
-void UrTUpdater::fileDownloaded(){
-    if(filesToDownload.size() > 0){
+void UrTUpdater::fileDownloaded()
+{
+    if (filesToDownload.size() > 0) {
         nbFilesDled++;
         currentFile = filesToDownload.takeFirst();
         dlBar->setRange(0, currentFile.fileSize.toInt());
@@ -823,17 +858,18 @@ void UrTUpdater::fileDownloaded(){
     }
 }
 
-void UrTUpdater::checkFiles(){
+void UrTUpdater::checkFiles()
+{
     QStringList nameFilter("zUrT*.pk3");
     QDir filesPath(updaterPath + URT_GAME_SUBDIR);
     QStringList filesList = filesPath.entryList(nameFilter);
 
-    if (packsList.size() <= 0){
+    if (packsList.size() <= 0) {
         return;
     }
 
-    foreach (QString file, filesList){
-        if (!packsList.contains(file)){
+    foreach (QString file, filesList) {
+        if (!packsList.contains(file)) {
             QFile* fileToRm = new QFile(updaterPath + URT_GAME_SUBDIR + "/" + file);
             fileToRm->remove();
             delete fileToRm;
@@ -841,88 +877,93 @@ void UrTUpdater::checkFiles(){
     }
 }
 
-void UrTUpdater::checkAPIVersion(){
-    if(apiVersion != updaterVersion){
+void UrTUpdater::checkAPIVersion()
+{
+    if (apiVersion != updaterVersion) {
         QMessageBox::critical(0, "Updater outdated", "This version ("+updaterVersion+") of the Updater is outdated. Please download the new Updater here: http://get.urbanterror.info");
         this->close();
     }
 }
 
-void UrTUpdater::checkDownloadServer(){
+void UrTUpdater::checkDownloadServer()
+{
     QList<serverInfo_s>::iterator li;
     bool found = false;
 
-    if(downloadServers.size() < 1){
+    if (downloadServers.size() < 1) {
         apiError();
     }
 
     // Check if the download server that is stored in the config file still exists
-    for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
-        if(li->serverId == downloadServer){
+    for (li = downloadServers.begin(); li != downloadServers.end(); ++li) {
+        if (li->serverId == downloadServer) {
             found = true;
         }
     }
 
     // If the engine isn't available anymore, pick the first one in the list
-    if(!found){
+    if (!found) {
         downloadServer = downloadServers.at(0).serverId;
     }
 }
 
-void UrTUpdater::checkGameEngine(){
+void UrTUpdater::checkGameEngine()
+{
     QList<engineInfo_s>::iterator li;
     bool found = false;
 
-    if(enginesList.size() < 1){
+    if (enginesList.size() < 1) {
         apiError();
     }
 
     // Check if the engine that is stored in the config file still exists
-    for(li = enginesList.begin(); li != enginesList.end(); ++li){
-        if(li->engineId == gameEngine){
+    for (li = enginesList.begin(); li != enginesList.end(); ++li) {
+        if (li->engineId == gameEngine) {
             found = true;
         }
     }
 
     // If the server isn't a mirror anymore, pick the first one in the list
-    if(!found){
+    if (!found) {
         gameEngine = enginesList.at(0).engineId;
     }
 }
 
-void UrTUpdater::checkVersion(){
+void UrTUpdater::checkVersion()
+{
     QList<versionInfo_s>::iterator li;
     bool found = false;
 
-    if(versionsList.size() < 1){
+    if (versionsList.size() < 1) {
         apiError();
     }
 
     // Check if the version that is stored in the config file still exists
-    for(li = versionsList.begin(); li != versionsList.end(); ++li){
-        if(li->versionId == currentVersion){
+    for (li = versionsList.begin(); li != versionsList.end(); ++li) {
+        if (li->versionId == currentVersion) {
             found = true;
         }
     }
 
     // If the version isn't available anymore, pick the first one in the list
-    if(!found){
+    if (!found) {
         currentVersion = versionsList.at(0).versionId;
     }
 }
 
-void UrTUpdater::drawNews(){
+void UrTUpdater::drawNews()
+{
     QList<QString>::iterator li;
     int i = 0;
 
-    if(newsList.size() < 1){
+    if (newsList.size() < 1) {
         apiError();
     }
 
-    for(li = newsList.begin(); li != newsList.end(); ++li, i++){
+    for (li = newsList.begin(); li != newsList.end(); ++li, i++) {
         QLabel* news = new QLabel(this);
 
-        if(!menuBar()->isNativeMenuBar()){
+        if (!menuBar()->isNativeMenuBar()) {
             news->move(150, 85 + (i*26));
         }
         else {
@@ -935,11 +976,12 @@ void UrTUpdater::drawNews(){
     }
 }
 
-void UrTUpdater::networkError(QNetworkReply::NetworkError code){
+void UrTUpdater::networkError(QNetworkReply::NetworkError code)
+{
     QString error = "";
     bool critical = false;
 
-    switch(code){
+    switch(code) {
         case QNetworkReply::ConnectionRefusedError:
             error = "Error: the remote server refused the connection. Please try again later.";
             critical = true;
@@ -980,15 +1022,15 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
             break;
     }
 
-    if(!error.isEmpty()){
-        if(critical == true){
+    if (!error.isEmpty()) {
+        if (critical == true) {
             QMessageBox::critical(0, "Download error", error);
             this->close();
         }
         else {
             QMessageBox::information(0, "Download error", error);
-            if(threadStarted){
-                if(dl->errorDl){
+            if (threadStarted) {
+                if (dl->errorDl) {
                     dl->errorDl = false;
                 }
             }
@@ -996,7 +1038,8 @@ void UrTUpdater::networkError(QNetworkReply::NetworkError code){
     }
 }
 
-void UrTUpdater::folderError(QString folder){
+void UrTUpdater::folderError(QString folder)
+{
     if (getPlatform() == "Mac")
     {
         QMessageBox::critical(this, folder + " file/folder", "Could not create the file/folder " + folder + ".\n\n"
@@ -1012,19 +1055,22 @@ void UrTUpdater::folderError(QString folder){
     this->close();
 }
 
-void UrTUpdater::apiError(){
+void UrTUpdater::apiError()
+{
     QMessageBox::critical(this, "API error", "The information from the API are missing or wrong. Please report it on www.urbanterror.info and try again later.");
     this->close();
 }
 
-void UrTUpdater::openHelpPage(){
+void UrTUpdater::openHelpPage()
+{
     QMessageBox::information(this, "Get help", "If you're experiencing issues with this updater, please contact us through:\n" \
                              "- the support forums: http://www.urbanterror.info/forums/\n" \
                              "- irc: #urbanterror @ irc.quakenet.org\n" \
                              "- email: contact@urbanterror.info");
 }
 
-void UrTUpdater::openAboutPage(){
+void UrTUpdater::openAboutPage()
+{
     QMessageBox::information(this, "About UrTUpdater", "Urban Terror Updater\n" \
                              "Version " + updaterVersion + "\n" \
                              "Author: Charles 'Barbatos' Duprey\n\n" \
@@ -1033,7 +1079,8 @@ void UrTUpdater::openAboutPage(){
                              "Source code: https://github.com/Barbatos/UrTUpdater/");
 }
 
-void UrTUpdater::openLicencePage(){
+void UrTUpdater::openLicencePage()
+{
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle("Do you accept the terms of this licence?");
     dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -1063,12 +1110,13 @@ void UrTUpdater::openLicencePage(){
     dialog->exec();
 }
 
-void UrTUpdater::openChangelogPage(){
+void UrTUpdater::openChangelogPage()
+{
     if (changelog == CHANGELOG_EMPTY_TEXT) {
         QMessageBox::information(this, "Sorry", "No changelog available :(");
         return;
     }
-    
+
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle("Urban Terror Changelog");
     dialog->setFixedWidth(600);
@@ -1085,8 +1133,9 @@ void UrTUpdater::openChangelogPage(){
     txt->show();
 }
 
-void UrTUpdater::openSettings(){
-    if(updateInProgress){
+void UrTUpdater::openSettings()
+{
+    if (updateInProgress) {
         QMessageBox::information(this, "Update in progress", "An update is in progress. Please wait until the update is finished.");
         return;
     }
@@ -1109,7 +1158,8 @@ void UrTUpdater::openSettings(){
     settings->exec();
 }
 
-void UrTUpdater::setSettings(int version, int engine, int server, int updateType){
+void UrTUpdater::setSettings(int version, int engine, int server, int updateType)
+{
     gameEngine = engine;
     currentVersion = version;
     downloadServer = server;
@@ -1121,54 +1171,41 @@ void UrTUpdater::setSettings(int version, int engine, int server, int updateType
     getManifest("versionFiles");
 }
 
-void UrTUpdater::launchGame(){
+void UrTUpdater::launchGame()
+{
     QProcess process;
     QString launchString = getEngineLaunchStringById(gameEngine);
     QString platform = getPlatform();
-    QString s;
 
-    if(updateInProgress){
+    if (updateInProgress) {
         return;
     }
 
-    if(platform == "Mac"){
-        s = "open \"" + updaterPath + launchString + "\"";
-    }
-    else {
-        s = updaterPath + launchString;
+    if (platform == "Mac") {
+        process.startDetached("open", QStringList(updaterPath + launchString));
+    } else {
+        process.startDetached(updaterPath + launchString);
     }
 
-    process.startDetached( s );
     process.waitForStarted();
 }
 
-void UrTUpdater::setLoadingIcon(int){
+void UrTUpdater::setLoadingIcon(int)
+{
     playButton->setIcon(QIcon(loaderAnim->currentPixmap()));
 }
 
-void UrTUpdater::setPlayIcon(int){
+void UrTUpdater::setPlayIcon(int)
+{
     playButton->setIcon(QIcon(playAnim->currentPixmap()));
 }
 
-QString UrTUpdater::getMd5Sum(QFile* file)
+QString UrTUpdater::getServerUrlById(int id)
 {
-    if (file->exists() && file->open(QIODevice::ReadOnly))
-    {
-        QByteArray content = file->readAll();
-        QByteArray hashed = QCryptographicHash::hash(content, QCryptographicHash::Md5);
-        file->close();
-
-        return hashed.toHex().data();
-    }
-
-    return "";
-}
-
-QString UrTUpdater::getServerUrlById(int id){
     QList<serverInfo_s>::iterator li;
 
-    for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
-        if(li->serverId == id){
+    for (li = downloadServers.begin(); li != downloadServers.end(); ++li) {
+        if (li->serverId == id) {
             return li->serverURL;
         }
     }
@@ -1176,11 +1213,11 @@ QString UrTUpdater::getServerUrlById(int id){
     return "";
 }
 
-QString UrTUpdater::getEngineLaunchStringById(int id){
+QString UrTUpdater::getEngineLaunchStringById(int id) {
     QList<engineInfo_s>::iterator li;
 
-    for(li = enginesList.begin(); li != enginesList.end(); ++li){
-        if(li->engineId == id){
+    for (li = enginesList.begin(); li != enginesList.end(); ++li) {
+        if (li->engineId == id) {
             return li->engineLaunchString;
         }
     }
@@ -1188,7 +1225,8 @@ QString UrTUpdater::getEngineLaunchStringById(int id){
     return "";
 }
 
-QString UrTUpdater::getSize(int *bytes){
+QString UrTUpdater::getSize(int *bytes)
+{
     QString nb;
 
     if (*bytes < 1024) {
@@ -1204,15 +1242,16 @@ QString UrTUpdater::getSize(int *bytes){
     return nb;
 }
 
-int UrTUpdater::getTotalSizeToDl(){
+int UrTUpdater::getTotalSizeToDl()
+{
     QList<fileInfo_s>::iterator li;
     int size = 0;
 
-    if(filesToDownload.size() <= 0){
+    if (filesToDownload.size() <= 0) {
         return 0;
     }
 
-    for(li = filesToDownload.begin(); li != filesToDownload.end(); ++li){
+    for (li = filesToDownload.begin(); li != filesToDownload.end(); ++li) {
         size += li->fileSize.toInt();
     }
     return size;
@@ -1224,23 +1263,25 @@ void UrTUpdater::closeEvent(QCloseEvent *event)
     if (updateInProgress) {
         QMessageBox::StandardButton result = QMessageBox::question(this, "An update is in progress", "An update is in progress. Are you sure that you want to quit?", QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Yes);
 
-        if(result != QMessageBox::Yes){
+        if (result != QMessageBox::Yes) {
             event->ignore();
             return;
         }
     }
 
-    if(!firstLaunch){
+    if (!firstLaunch) {
         saveLocalConfig();
     }
 
-    if(threadStarted){
+    if (threadStarted) {
+        dlThread->quit();
         dlThread->deleteLater();
     }
 
     event->accept();
 }
 
-UrTUpdater::~UrTUpdater(){
+UrTUpdater::~UrTUpdater()
+{
     delete ui;
 }

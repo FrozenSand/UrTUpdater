@@ -44,11 +44,11 @@ public:
     QNetworkReply *apiAnswer;
 
 public slots:
-    void init();
+    bool init();
     void startDlThread();
     void work();
 
-    void setDLValue(int v);
+    void updateCheckStatus(int progress, QString status);
     void setDLValueP(qint64 r, qint64 t);
 
     QString getPlatform();
@@ -61,7 +61,6 @@ public slots:
 
     QString getServerUrlById(int);
     QString getEngineLaunchStringById(int id);
-    QString getMd5Sum(QFile* file);
     QString getSize(int *bytes);
     int getTotalSizeToDl();
 
@@ -100,7 +99,7 @@ public slots:
 
 signals:
     void dlFile(QString, QString, int, QString);
-    void checkingChanged(int percent);
+    void checkingChanged(int percent, QString status);
     void requestNewDlLabel(QString);
 
 private:

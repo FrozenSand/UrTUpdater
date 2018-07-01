@@ -23,15 +23,18 @@
 
 #include "settings.h"
 
-Settings::Settings(QWidget *parent) : QDialog(parent){
+Settings::Settings(QWidget *parent) : QDialog(parent)
+{
 
 }
 
-Settings::~Settings(){
+Settings::~Settings()
+{
 
 }
 
-void Settings::init(){
+void Settings::init()
+{
     QList<versionInfo_s>::iterator  liVersion;
     QList<serverInfo_s>::iterator   liServer;
     QList<engineInfo_s>::iterator   liEngine;
@@ -71,13 +74,13 @@ void Settings::init(){
 
     versionList = new QComboBox(this);
 
-    for(liVersion = versionsList.begin(); liVersion != versionsList.end(); ++liVersion){
+    for (liVersion = versionsList.begin(); liVersion != versionsList.end(); ++liVersion) {
         versionList->addItem(liVersion->versionName);
     }
 
     currentVersionName = getVersionNameById(currentVersion);
 
-    if(!currentVersionName.isEmpty()){
+    if (!currentVersionName.isEmpty()) {
         versionList->setCurrentIndex((int)versionList->findText(currentVersionName));
     }
 
@@ -87,13 +90,13 @@ void Settings::init(){
 
     engineList = new QComboBox(this);
 
-    for(liEngine = enginesList.begin(); liEngine != enginesList.end(); ++liEngine){
+    for (liEngine = enginesList.begin(); liEngine != enginesList.end(); ++liEngine) {
         engineList->addItem(liEngine->engineName);
     }
 
     currentEngineName = getEngineNameById(currentEngine);
 
-    if(!currentEngineName.isEmpty()){
+    if (!currentEngineName.isEmpty()) {
         engineList->setCurrentIndex((int)engineList->findText(currentEngineName));
     }
 
@@ -103,8 +106,8 @@ void Settings::init(){
 
     serverList = new QComboBox(this);
 
-    for(liServer = downloadServers.begin(); liServer != downloadServers.end(); ++liServer){
-        if(liServer->serverLocation != ""){
+    for (liServer = downloadServers.begin(); liServer != downloadServers.end(); ++liServer) {
+        if (liServer->serverLocation != "") {
             serverList->addItem(QIcon(QString(":/images/flags/%1.png").arg(liServer->serverLocation)), liServer->serverName);
         }
         else {
@@ -114,7 +117,7 @@ void Settings::init(){
 
     currentServerName = getServerNameById(currentServer);
 
-    if(!currentServerName.isEmpty()){
+    if (!currentServerName.isEmpty()) {
         serverList->setCurrentIndex((int)serverList->findText(currentServerName));
     }
 
@@ -126,7 +129,7 @@ void Settings::init(){
     updateBehaviorList->addItem(QString("Automatic (default)"));
     updateBehaviorList->addItem(QString("Ask me"));
 
-    if(currentUpdateBehavior != -1){
+    if (currentUpdateBehavior != -1) {
         updateBehaviorList->setCurrentIndex(currentUpdateBehavior);
     }
     else {
@@ -145,13 +148,14 @@ void Settings::init(){
     setModal(true);
 }
 
-void Settings::okButtonClicked(){
+void Settings::okButtonClicked()
+{
     int idVersion   = getVersionIdByName(versionList->itemText(versionList->currentIndex()));
     int idServer    = getServerIdByName(serverList->itemText(serverList->currentIndex()));
     int idEngine    = getEngineIdByName(engineList->itemText(engineList->currentIndex()));
     int idUpdate    = updateBehaviorList->currentIndex();
 
-    if(idVersion == -1 || idServer == -1 || idEngine == -1 || idUpdate == -1){
+    if (idVersion == -1 || idServer == -1 || idEngine == -1 || idUpdate == -1) {
         return;
     }
 
@@ -159,11 +163,12 @@ void Settings::okButtonClicked(){
     close();
 }
 
-int Settings::getVersionIdByName(QString name){
+int Settings::getVersionIdByName(QString name)
+{
     QList<versionInfo_s>::iterator li;
 
-    for(li = versionsList.begin(); li != versionsList.end(); ++li){
-        if(li->versionName == name){
+    for (li = versionsList.begin(); li != versionsList.end(); ++li) {
+        if (li->versionName == name) {
             return li->versionId;
         }
     }
@@ -171,11 +176,12 @@ int Settings::getVersionIdByName(QString name){
     return -1;
 }
 
-QString Settings::getVersionNameById(int id){
+QString Settings::getVersionNameById(int id)
+{
     QList<versionInfo_s>::iterator li;
 
-    for(li = versionsList.begin(); li != versionsList.end(); ++li){
-        if(li->versionId == id){
+    for (li = versionsList.begin(); li != versionsList.end(); ++li) {
+        if (li->versionId == id) {
             return li->versionName;
         }
     }
@@ -183,11 +189,12 @@ QString Settings::getVersionNameById(int id){
     return "";
 }
 
-int Settings::getServerIdByName(QString name){
+int Settings::getServerIdByName(QString name)
+{
     QList<serverInfo_s>::iterator li;
 
-    for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
-        if(li->serverName == name){
+    for (li = downloadServers.begin(); li != downloadServers.end(); ++li) {
+        if (li->serverName == name) {
             return li->serverId;
         }
     }
@@ -195,11 +202,12 @@ int Settings::getServerIdByName(QString name){
     return -1;
 }
 
-QString Settings::getServerNameById(int id){
+QString Settings::getServerNameById(int id)
+{
     QList<serverInfo_s>::iterator li;
 
-    for(li = downloadServers.begin(); li != downloadServers.end(); ++li){
-        if(li->serverId == id){
+    for (li = downloadServers.begin(); li != downloadServers.end(); ++li) {
+        if (li->serverId == id) {
             return li->serverName;
         }
     }
@@ -207,11 +215,12 @@ QString Settings::getServerNameById(int id){
     return "";
 }
 
-int Settings::getEngineIdByName(QString name){
+int Settings::getEngineIdByName(QString name)
+{
     QList<engineInfo_s>::iterator li;
 
-    for(li = enginesList.begin(); li != enginesList.end(); ++li){
-        if(li->engineName == name){
+    for (li = enginesList.begin(); li != enginesList.end(); ++li) {
+        if (li->engineName == name) {
             return li->engineId;
         }
     }
@@ -219,11 +228,12 @@ int Settings::getEngineIdByName(QString name){
     return -1;
 }
 
-QString Settings::getEngineNameById(int id){
+QString Settings::getEngineNameById(int id)
+{
     QList<engineInfo_s>::iterator li;
 
-    for(li = enginesList.begin(); li != enginesList.end(); ++li){
-        if(li->engineId == id){
+    for (li = enginesList.begin(); li != enginesList.end(); ++li) {
+        if (li->engineId == id) {
             return li->engineName;
         }
     }

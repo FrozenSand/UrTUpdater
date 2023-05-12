@@ -18,11 +18,11 @@
 # @version    4.0.3
 # @author     Charles 'Barbatos' Duprey
 # @email      barbatos@urbanterror.info
-# @copyright  2013-2016 Frozen Sand / 0870760 B.C. Ltd
+# @copyright  2013-2023 Frozensand Games Limited
 
 QT          +=  core gui network widgets xml concurrent
 
-CONFIG      +=  x86 static
+CONFIG      +=  static
 
 TARGET       =  UrTUpdater
 TEMPLATE     =  app

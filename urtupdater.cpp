@@ -18,7 +18,7 @@
   * @version    4.0.3
   * @author     Charles 'Barbatos' Duprey
   * @email      barbatos@urbanterror.info
-  * @copyright  2013-2016 Frozen Sand / 0870760 B.C. Ltd
+  * @copyright  2013-2023 Frozensand Games Limited
   */
 
 #include "urtupdater.h"
@@ -288,6 +288,7 @@ void UrTUpdater::parseLocalConfig()
 
     if (!f->open(QFile::ReadOnly)) {
         delete f;
+        delete dom;
         configFileExists = false;
         return;
     }
@@ -389,7 +390,7 @@ void UrTUpdater::getManifest(QString query)
     apiAnswer = apiManager->post(apiRequest, url.query(QUrl::FullyEncoded).toUtf8());
     connect(apiAnswer, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(setDLValueP(qint64, qint64)));
     connect(apiAnswer, SIGNAL(finished()), this, SLOT(parseAPIAnswer()));
-    connect(apiAnswer, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
+    connect(apiAnswer, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
 }
 
 void UrTUpdater::parseAPIAnswer()
@@ -401,7 +402,7 @@ void UrTUpdater::parseAPIAnswer()
 
     QFutureWatcher<void>* watcher = new QFutureWatcher<void>();
     connect(watcher, SIGNAL(finished()), this, SLOT(work()));
-    QFuture<void> parser = QtConcurrent::run(this, &UrTUpdater::parseManifest, apiData);
+    QFuture<void> parser = QtConcurrent::run(&UrTUpdater::parseManifest, this, apiData);
     watcher->setFuture(parser);
 }
 
@@ -1064,8 +1065,8 @@ void UrTUpdater::apiError()
 void UrTUpdater::openHelpPage()
 {
     QMessageBox::information(this, "Get help", "If you're experiencing issues with this updater, please contact us through:\n" \
-                             "- the support forums: http://www.urbanterror.info/forums/\n" \
-                             "- irc: #urbanterror @ irc.quakenet.org\n" \
+                             "- the support forums: https://www.urbanterror.info/forums/\n" \
+                             "- Discord: https://discord.gg/ez4v5bv\n" \
                              "- email: contact@urbanterror.info");
 }
 
@@ -1074,9 +1075,9 @@ void UrTUpdater::openAboutPage()
     QMessageBox::information(this, "About UrTUpdater", "Urban Terror Updater\n" \
                              "Version " + updaterVersion + "\n" \
                              "Author: Charles 'Barbatos' Duprey\n\n" \
-                             "Copyright: FrozenSand / 0870760 B.C. Ltd. All rights reserved.\n" \
+                             "Copyright: Frozensand Games Limited. All rights reserved.\n" \
                              "This Updater is under the LGPL v2.1 licence.\n\n" \
-                             "Source code: https://github.com/Barbatos/UrTUpdater/");
+                             "Source code: https://github.com/FrozenSand/UrTUpdater/");
 }
 
 void UrTUpdater::openLicencePage()

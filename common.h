@@ -18,7 +18,7 @@
   * @version    4.0.3
   * @author     Charles 'Barbatos' Duprey
   * @email      barbatos@urbanterror.info
-  * @copyright  2013-2016 Frozen Sand / 0870760 B.C. Ltd
+  * @copyright  2013-2023 Frozensand Games Limited
   */
 
 #ifndef COMMON_H
@@ -55,10 +55,11 @@
 #include <QtConcurrentRun>
 #include <QSysInfo>
 #include <QNetworkProxyFactory>
+#include <QElapsedTimer>
 
 #define URT_GAME_NAME           "Urban Terror"
 #define URT_GAME_SUBDIR         "q3ut4"
-#define URT_API_LINK            "http://www.urbanterror.info/api/updaterv4/"
+#define URT_API_LINK            "https://www.urbanterror.info/api/updaterv4/"
 #define URT_UPDATER_VERSION     "4.0.3"
 #define URT_UPDATER_CFG         "updater-cfg.xml"
 #define CHANGELOG_EMPTY_TEXT    "Empty."

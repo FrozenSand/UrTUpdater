@@ -18,6 +18,7 @@ UPDATERVERSION=${UPDATERVERSION:-4.0.3}
 APIURL="http://www.urbanterror.info/api/updaterv4/"
 URT_GAME_SUBDIR=${URT_GAME_SUBDIR:-q3ut4}
 BROWSER=${BROWSER:-}
+SEDHTMLFILTER='s/< *[aA] *[Hh][Rr][Ee][Ff] *= *"\([^"]*\)"[^>]*>/\n ---> \1 =\n/g;s/<[^>]*>//g'
 #PLATFORM=${PLATFORM:-Linux32}
 
 if [ -z "$PLATFORM" ]; then
@@ -242,7 +243,7 @@ function doBrowser ()
     echo "$1" > "$TMPFILE"
 
     if [ -z "$BROWSER" ]; then
-        cat "$TMPFILE"
+        sed -e "$SEDHTMLFILTER" "$TMPFILE" | more
     else
         $BROWSER "$TMPFILE"
     fi
